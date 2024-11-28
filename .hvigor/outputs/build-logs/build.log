@@ -1,0 +1,481 @@
+[2024-11-28T12:55:33.964] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2024-11-28T12:55:34.359] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: false,
+  analyze: 0,
+  logLevel: Level { level: 20000, levelStr: 'INFO', colour: 'green' }
+}
+[2024-11-28T12:55:34.374] [DEBUG] debug-file - hvigorfile, resolving D:\Projects\JoyFit\JoyFit\hvigorfile.ts
+[2024-11-28T12:55:35.665] [DEBUG] debug-file - hvigorfile, require result:  { appTasks: [Getter] }
+[2024-11-28T12:55:35.828] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2024-11-28T12:55:35.831] [DEBUG] debug-file - Product 'default' using build option: {
+  "debuggable": true
+} in this build.
+[2024-11-28T12:55:35.842] [DEBUG] debug-file - Local scan or download hmscore sdk components toolchains,ets,native
+[2024-11-28T12:55:35.839] [DEBUG] debug-file - Local scan or download HarmonyOS sdk components toolchains,ets,js,native,previewer
+[2024-11-28T12:55:35.848] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2024-11-28T12:55:35.873] [DEBUG] debug-file - Sdk init in 38 ms 
+[2024-11-28T12:55:35.896] [DEBUG] debug-file - Project task initialization takes 23 ms 
+[2024-11-28T12:55:35.904] [DEBUG] debug-file - hvigorfile, resolving D:\Projects\JoyFit\JoyFit\entry\hvigorfile.ts
+[2024-11-28T12:55:35.940] [DEBUG] debug-file - Module entry Collected Dependency: D:\Projects\JoyFit\JoyFit\entry\src\main\cpp\types\libentry
+[2024-11-28T12:55:35.948] [DEBUG] debug-file - Module entry task initialization takes 4 ms 
+[2024-11-28T12:55:35.951] [DEBUG] debug-file - project has submodules:entry
+[2024-11-28T12:55:35.970] [DEBUG] debug-file - Configuration task cost before running: 1 s 625 ms 
+[2024-11-28T12:55:35.972] [DEBUG] debug-file - Executing task :entry:clean
+[2024-11-28T12:55:35.974] [DEBUG] debug-file - entry : clean cost memory 0.22690582275390625
+[2024-11-28T12:55:35.990] [DEBUG] debug-file - Module 'entry' target 'default' using build option: {
+  "debuggable": true,
+  "copyFrom": "default",
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+} in this build.
+[2024-11-28T12:55:33.966] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.0.0', dependencies: {} }
+[2024-11-28T12:55:34.360] [DEBUG] debug-file - Since current hvigor version 5.8.5 differs from last hvigor version 
+      undefined, delete file-cache.json and task-cache.json.
+[2024-11-28T12:55:35.665] [DEBUG] debug-file - hvigorfile, binding system plugins { appTasks: [Getter] }
+[2024-11-28T12:55:35.828] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2024-11-28T12:55:35.834] [DEBUG] debug-file - No signingConfig found, initRemoteHspCache failed.
+[2024-11-28T12:55:36.006] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2024-11-28T12:55:35.896] [DEBUG] debug-file - hvigorfile, resolve finished D:\Projects\JoyFit\JoyFit\hvigorfile.ts
+[2024-11-28T12:55:35.908] [DEBUG] debug-file - hvigorfile, require result:  { hapTasks: [Getter] }
+[2024-11-28T12:55:35.940] [DEBUG] debug-file - Module entry's total dependency: 1
+[2024-11-28T12:55:35.948] [DEBUG] debug-file - hvigorfile, resolve finished D:\Projects\JoyFit\JoyFit\entry\hvigorfile.ts
+[2024-11-28T12:55:35.953] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2024-11-28T12:55:35.972] [DEBUG] debug-file - clean: Worker pool is inactive.
+[2024-11-28T12:55:35.975] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 630 ms 
+[2024-11-28T12:55:35.992] [DEBUG] debug-file - Module 'entry' target 'ohosTest' using build option: {
+  "debuggable": true,
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+} in this build.
+[2024-11-28T12:55:33.969] [DEBUG] debug-file - env: daemon=false
+[2024-11-28T12:55:34.361] [DEBUG] debug-file - Cache service initialization finished in 2 ms 
+[2024-11-28T12:55:35.828] [DEBUG] debug-file - Product 'default' build option: {}
+[2024-11-28T12:55:36.008] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2024-11-28T12:55:35.908] [DEBUG] debug-file - hvigorfile, binding system plugins { hapTasks: [Getter] }
+[2024-11-28T12:55:35.941] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=entry, buildMode=debug
+[2024-11-28T12:55:35.957] [DEBUG] debug-file - load to the disk finished
+[2024-11-28T12:55:35.975] [INFO] debug-file - Finished :entry:clean... after 3 ms 
+[2024-11-28T12:55:35.997] [DEBUG] debug-file - hvigor start cli arguments:{
+  prop: [ 'product=default' ],
+  sync: true,
+  parallel: true,
+  incremental: true,
+  daemon: false,
+  _: [],
+  analyze: 'normal'
+}
+[2024-11-28T12:55:33.969] [DEBUG] debug-file - no-daemon, use the parent process.execArgv --max-old-space-size=8192,--expose-gc
+[2024-11-28T12:55:35.828] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Current worker pool is stopped or closed.
+[2024-11-28T12:55:35.941] [DEBUG] debug-file - Target 'default' config: {}
+[2024-11-28T12:55:35.958] [DEBUG] debug-file - Module JoyFit Collected Dependency: 
+[2024-11-28T12:55:35.976] [DEBUG] debug-file - Executing task ::clean
+[2024-11-28T12:55:36.003] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Clear worker 0.
+[2024-11-28T12:55:35.942] [DEBUG] debug-file - Target 'ohosTest' config: {}
+[2024-11-28T12:55:35.958] [DEBUG] debug-file - Module JoyFit's total dependency: 0
+[2024-11-28T12:55:35.976] [DEBUG] debug-file - clean: Worker pool is inactive.
+[2024-11-28T12:55:36.003] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Worker 0 has been cleared.
+[2024-11-28T12:55:35.942] [DEBUG] debug-file - Module 'entry' target 'default' build option: {
+  "debuggable": true,
+  "copyFrom": "default",
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+}
+[2024-11-28T12:55:35.962] [DEBUG] debug-file - Module entry Collected Dependency: D:\Projects\JoyFit\JoyFit\entry\src\main\cpp\types\libentry
+[2024-11-28T12:55:35.976] [DEBUG] debug-file - JoyFit : clean cost memory 0.02768707275390625
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Current idle worker size: 1.
+[2024-11-28T12:55:35.942] [DEBUG] debug-file - Module 'entry' target 'ohosTest' build option: {
+  "debuggable": true,
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+}
+[2024-11-28T12:55:35.962] [DEBUG] debug-file - Module entry's total dependency: 1
+[2024-11-28T12:55:35.976] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 632 ms 
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Current busy worker size: 0.
+[2024-11-28T12:55:35.942] [DEBUG] debug-file - End initialize module-target build option map, moduleName=entry
+[2024-11-28T12:55:35.966] [DEBUG] debug-file - Configuration phase cost:1 s 600 ms 
+[2024-11-28T12:55:35.976] [INFO] debug-file - Finished ::clean... after 1 ms 
+[2024-11-28T12:55:35.942] [DEBUG] debug-file - Module 'entry' target 'default' using build option: {
+  "debuggable": true,
+  "copyFrom": "default",
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+} in this build.
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Clear worker 1.
+[2024-11-28T12:55:35.976] [DEBUG] debug-file - Executing task :entry:init
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Worker 1 has been cleared.
+[2024-11-28T12:55:35.977] [DEBUG] debug-file - entry : init cost memory 0.01010894775390625
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Current idle worker size: 0.
+[2024-11-28T12:55:35.977] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 632 ms 
+[2024-11-28T12:55:36.010] [DEBUG] debug-file - Current busy worker size: 0.
+[2024-11-28T12:55:35.977] [INFO] debug-file - Finished :entry:init... after 1 ms 
+[2024-11-28T12:55:36.011] [DEBUG] debug-file - hvigor build process will be closed.
+[2024-11-28T12:55:35.977] [DEBUG] debug-file - Executing task ::init
+[2024-11-28T12:55:36.017] [DEBUG] debug-file - worker[0] exits with exit code 0.
+[2024-11-28T12:55:35.977] [DEBUG] debug-file - JoyFit : init cost memory 0.00888824462890625
+[2024-11-28T12:55:36.017] [DEBUG] debug-file - worker[1] exits with exit code 0.
+[2024-11-28T12:55:35.977] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 633 ms 
+[2024-11-28T12:55:36.017] [DEBUG] debug-file - Current worker pool is terminated.
+[2024-11-28T12:55:35.977] [INFO] debug-file - Finished ::init... after 1 ms 
+[2024-11-28T12:55:37.713] [DEBUG] debug-file - env: nodejsVersion=v18.20.1
+[2024-11-28T12:55:37.771] [DEBUG] debug-file - env: daemon=true
+[2024-11-28T12:55:37.715] [DEBUG] debug-file - env: hvigor-config.json5 content = { modelVersion: '5.0.0', dependencies: {} }
+[2024-11-28T12:55:38.357] [DEBUG] debug-file - hvigor start cli arguments:{
+  prop: [ 'module=entry', 'product=default' ],
+  mode: 'module',
+  parallel: true,
+  incremental: true,
+  daemon: true,
+  _: [ 'compileNative', '--analyze=normal' ]
+}
+[2024-11-28T12:55:38.380] [DEBUG] debug-file - session manager: set active socket. socketId=pwUVDiftILp-iO4qAAAB
+[2024-11-28T12:55:38.418] [DEBUG] debug-file - java daemon tryConnect success
+[2024-11-28T12:55:39.073] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2024-11-28T12:55:39.091] [DEBUG] debug-file - Hvigor init with startParameters:{
+  hvigorfileTypeCheck: false,
+  parallelExecution: true,
+  incrementalExecution: true,
+  printStackTrace: false,
+  daemon: true,
+  analyze: 0,
+  logLevel: Level { level: 20000, levelStr: 'INFO', colour: 'green' }
+}
+[2024-11-28T12:55:39.093] [DEBUG] debug-file - Cache service initialization finished in 2 ms 
+[2024-11-28T12:55:39.101] [DEBUG] debug-file - hvigorfile, resolving D:\Projects\JoyFit\JoyFit\hvigorfile.ts
+[2024-11-28T12:55:40.431] [DEBUG] debug-file - hvigorfile, require result:  {}
+[2024-11-28T12:55:40.431] [DEBUG] debug-file - hvigorfile, binding system plugins {}
+[2024-11-28T12:55:40.618] [DEBUG] debug-file - Start initialize project's product build option map with build mode debug.
+[2024-11-28T12:55:40.618] [DEBUG] debug-file - Picking option from product 'default' with build mode 'debug'.
+[2024-11-28T12:55:40.619] [DEBUG] debug-file - Product 'default' build option: {}
+[2024-11-28T12:55:40.619] [DEBUG] debug-file - End initialize project's product build option map with build mode 'debug'.
+[2024-11-28T12:55:40.623] [DEBUG] debug-file - Product 'default' using build option: {
+  "debuggable": true
+} in this build.
+[2024-11-28T12:55:40.625] [DEBUG] debug-file - No signingConfig found, initRemoteHspCache failed.
+[2024-11-28T12:55:40.629] [DEBUG] debug-file - Local scan or download HarmonyOS sdk components toolchains,ets,js,native,previewer
+[2024-11-28T12:55:40.632] [DEBUG] debug-file - Local scan or download hmscore sdk components toolchains,ets,native
+[2024-11-28T12:55:40.636] [DEBUG] debug-file - Start recording SDK configuration permission data.
+[2024-11-28T12:55:40.664] [DEBUG] debug-file - Sdk init in 38 ms 
+[2024-11-28T12:55:40.680] [DEBUG] debug-file - Project task initialization takes 14 ms 
+[2024-11-28T12:55:40.680] [DEBUG] debug-file - hvigorfile, resolve finished D:\Projects\JoyFit\JoyFit\hvigorfile.ts
+[2024-11-28T12:55:40.684] [DEBUG] debug-file - hvigorfile, resolving D:\Projects\JoyFit\JoyFit\entry\hvigorfile.ts
+[2024-11-28T12:55:40.689] [DEBUG] debug-file - hvigorfile, require result:  {}
+[2024-11-28T12:55:40.690] [DEBUG] debug-file - hvigorfile, binding system plugins {}
+[2024-11-28T12:55:40.704] [DEBUG] debug-file - Module entry Collected Dependency: D:\Projects\JoyFit\JoyFit\entry\src\main\cpp\types\libentry
+[2024-11-28T12:55:40.704] [DEBUG] debug-file - Module entry's total dependency: 1
+[2024-11-28T12:55:40.705] [DEBUG] debug-file - Start initialize module-target build option map, moduleName=entry, buildMode=debug
+[2024-11-28T12:55:40.706] [DEBUG] debug-file - Target 'default' config: {}
+[2024-11-28T12:55:40.707] [DEBUG] debug-file - Target 'ohosTest' config: {}
+[2024-11-28T12:55:40.707] [DEBUG] debug-file - Module 'entry' target 'default' build option: {
+  "debuggable": true,
+  "copyFrom": "default",
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+}
+[2024-11-28T12:55:40.707] [DEBUG] debug-file - Module 'entry' target 'ohosTest' build option: {
+  "debuggable": true,
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+}
+[2024-11-28T12:55:40.707] [DEBUG] debug-file - End initialize module-target build option map, moduleName=entry
+[2024-11-28T12:55:40.707] [DEBUG] debug-file - Module 'entry' target 'default' using build option: {
+  "debuggable": true,
+  "copyFrom": "default",
+  "externalNativeOptions": {
+    "path": "./src/main/cpp/CMakeLists.txt",
+    "arguments": "",
+    "cppFlags": "",
+    "abiFilters": [
+      "arm64-v8a",
+      "x86_64"
+    ]
+  }
+} in this build.
+[2024-11-28T12:55:40.713] [DEBUG] debug-file - Module entry task initialization takes 4 ms 
+[2024-11-28T12:55:40.713] [DEBUG] debug-file - hvigorfile, resolve finished D:\Projects\JoyFit\JoyFit\entry\hvigorfile.ts
+[2024-11-28T12:55:40.732] [DEBUG] debug-file - hvigorfile, resolve hvigorfile dependencies in 17 ms 
+[2024-11-28T12:55:40.733] [DEBUG] debug-file - project has submodules:entry
+[2024-11-28T12:55:40.735] [DEBUG] debug-file - start to load updatedOhPackageInfo to the disk
+[2024-11-28T12:55:40.740] [DEBUG] debug-file - load to the disk finished
+[2024-11-28T12:55:40.742] [DEBUG] debug-file - Module JoyFit Collected Dependency: 
+[2024-11-28T12:55:40.742] [DEBUG] debug-file - Module JoyFit's total dependency: 0
+[2024-11-28T12:55:40.746] [DEBUG] debug-file - Module entry Collected Dependency: D:\Projects\JoyFit\JoyFit\entry\src\main\cpp\types\libentry
+[2024-11-28T12:55:40.746] [DEBUG] debug-file - Module entry's total dependency: 1
+[2024-11-28T12:55:40.750] [DEBUG] debug-file - Configuration phase cost:1 s 655 ms 
+[2024-11-28T12:55:40.754] [DEBUG] debug-file - Configuration task cost before running: 1 s 675 ms 
+[2024-11-28T12:55:40.756] [DEBUG] debug-file - jsonObjWithoutParam {} at undefined
+[2024-11-28T12:55:40.757] [DEBUG] debug-file - jsonObjWithoutParam {"libentry.so":"file:./src/main/cpp/types/libentry"} at undefined
+[2024-11-28T12:55:40.757] [DEBUG] debug-file - jsonObjWithoutParam {"license":"","devDependencies":{},"author":"","name":"entry","description":"Please describe the basic information.","main":"","version":"1.0.0","dependencies":{"libentry.so":"file:./src/main/cpp/types/libentry"}} at undefined
+[2024-11-28T12:55:40.759] [DEBUG] debug-file - Executing task :entry:default@PreBuild
+[2024-11-28T12:55:40.924] [DEBUG] debug-file - current product is not Atomic service.
+[2024-11-28T12:55:40.925] [DEBUG] debug-file - Use tool [win32: JAVA_HOME, CLASSPATH]
+ [
+  { JAVA_HOME: 'D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\jbr' },
+  { CLASSPATH: undefined }
+]
+[2024-11-28T12:55:40.925] [DEBUG] debug-file - Use tool [win32: NODE_HOME]
+ [
+  {
+    NODE_HOME: 'D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\tools\\node'
+  }
+]
+[2024-11-28T12:55:40.926] [DEBUG] debug-file - entry : default@PreBuild cost memory -4.9561309814453125
+[2024-11-28T12:55:40.926] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 848 ms 
+[2024-11-28T12:55:40.928] [INFO] debug-file - Finished :entry:default@PreBuild... after 167 ms 
+[2024-11-28T12:55:40.930] [DEBUG] debug-file - jsonObjWithoutParam {} at undefined
+[2024-11-28T12:55:40.930] [DEBUG] debug-file - jsonObjWithoutParam {"libentry.so":"file:./src/main/cpp/types/libentry"} at undefined
+[2024-11-28T12:55:40.930] [DEBUG] debug-file - jsonObjWithoutParam {"license":"","devDependencies":{},"author":"","name":"entry","description":"Please describe the basic information.","main":"","version":"1.0.0","dependencies":{"libentry.so":"file:./src/main/cpp/types/libentry"}} at undefined
+[2024-11-28T12:55:40.930] [DEBUG] debug-file - Executing task :entry:default@ConfigureCmake
+[2024-11-28T12:55:40.937] [DEBUG] debug-file - entry : default@ConfigureCmake cost memory 0.095001220703125
+[2024-11-28T12:55:40.937] [DEBUG] debug-file - runTaskFromQueue task cost before running: 1 s 859 ms 
+[2024-11-28T12:55:40.938] [INFO] debug-file - Finished :entry:default@ConfigureCmake... after 8 ms 
+[2024-11-28T12:55:40.940] [DEBUG] debug-file - jsonObjWithoutParam {} at undefined
+[2024-11-28T12:55:40.940] [DEBUG] debug-file - jsonObjWithoutParam {"libentry.so":"file:./src/main/cpp/types/libentry"} at undefined
+[2024-11-28T12:55:40.940] [DEBUG] debug-file - jsonObjWithoutParam {"license":"","devDependencies":{},"author":"","name":"entry","description":"Please describe the basic information.","main":"","version":"1.0.0","dependencies":{"libentry.so":"file:./src/main/cpp/types/libentry"}} at undefined
+[2024-11-28T12:55:40.940] [DEBUG] debug-file - Executing task :entry:default@BuildNativeWithCmake
+[2024-11-28T12:55:40.945] [DEBUG] debug-file - Use tool [Cmake]
+ [
+  'D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\openharmony\\native\\build-tools\\cmake\\bin\\cmake.exe',
+  '-HD:\\Projects\\JoyFit\\JoyFit\\entry\\src\\main\\cpp',
+  '-BD:\\Projects\\JoyFit\\JoyFit\\entry\\.cxx\\default\\default\\debug\\arm64-v8a',
+  '-DOHOS_ARCH=arm64-v8a',
+  '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=D:\\Projects\\JoyFit\\JoyFit\\entry\\build\\default\\intermediates\\cmake\\default\\obj\\arm64-v8a',
+  '-DCMAKE_BUILD_TYPE=Debug',
+  '-DOHOS_SDK_NATIVE=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\openharmony\\native',
+  '-DCMAKE_SYSTEM_NAME=OHOS',
+  '-DCMAKE_OHOS_ARCH_ABI=arm64-v8a',
+  '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
+  '-DCMAKE_TOOLCHAIN_FILE=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\hms\\native\\build\\cmake\\hmos.toolchain.cmake',
+  '-GNinja',
+  '-DCMAKE_MAKE_PROGRAM=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\openharmony\\native\\build-tools\\cmake\\bin\\ninja.exe',
+  '-DCMAKE_FIND_ROOT_PATH=D:\\Projects\\JoyFit\\JoyFit\\entry\\.cxx\\default\\default\\debug\\hvigor\\arm64-v8a',
+  '-DPACKAGE_FIND_FILE=D:\\Projects\\JoyFit\\JoyFit\\entry\\.cxx\\default\\default\\debug\\hvigor\\arm64-v8a\\summary.cmake',
+  '--no-warn-unused-cli',
+  '-DHMOS_SDK_NATIVE=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\hms\\native'
+]
+[2024-11-28T12:55:40.949] [DEBUG] debug-file - Clean CMakeCache.txt due to outdated CMake configuration.
+[2024-11-28T12:55:40.950] [DEBUG] debug-file - - no fingerprint file, will remove stale cache CMakeCache.txt
+[2024-11-28T12:55:40.951] [DEBUG] debug-file - Since there is no instance or instance is terminated, create a new worker pool.
+[2024-11-28T12:55:40.951] [DEBUG] debug-file - Worker pool is initialized with config:  {
+  minPoolNum: 2,
+  maxPoolNum: undefined,
+  maxCoreSize: undefined,
+  cacheCapacity: undefined,
+  cacheTtl: undefined
+}
+[2024-11-28T12:55:40.953] [DEBUG] debug-file - Create  resident worker with id: 0.
+[2024-11-28T12:55:40.956] [DEBUG] debug-file - Create  resident worker with id: 1.
+[2024-11-28T12:55:40.960] [DEBUG] debug-file - default@BuildNativeWithCmake work[0] is submitted.
+[2024-11-28T12:55:40.962] [DEBUG] debug-file - default@BuildNativeWithCmake work[0] is pushed to ready queue.
+[2024-11-28T12:55:40.962] [DEBUG] debug-file - A work dispatched to worker[15] failed because unable to get work from ready queue.
+[2024-11-28T12:55:40.962] [DEBUG] debug-file - Create  resident worker with id: 14.
+[2024-11-28T12:55:40.964] [DEBUG] debug-file - default@BuildNativeWithCmake work[0] has been dispatched to worker[14].
+[2024-11-28T12:55:40.964] [DEBUG] debug-file - default@BuildNativeWithCmake work[0] is dispatched.
+[2024-11-28T12:55:40.965] [DEBUG] debug-file - Use tool [Cmake]
+ [
+  'D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\openharmony\\native\\build-tools\\cmake\\bin\\cmake.exe',
+  '-HD:\\Projects\\JoyFit\\JoyFit\\entry\\src\\main\\cpp',
+  '-BD:\\Projects\\JoyFit\\JoyFit\\entry\\.cxx\\default\\default\\debug\\x86_64',
+  '-DOHOS_ARCH=x86_64',
+  '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=D:\\Projects\\JoyFit\\JoyFit\\entry\\build\\default\\intermediates\\cmake\\default\\obj\\x86_64',
+  '-DCMAKE_BUILD_TYPE=Debug',
+  '-DOHOS_SDK_NATIVE=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\openharmony\\native',
+  '-DCMAKE_SYSTEM_NAME=OHOS',
+  '-DCMAKE_OHOS_ARCH_ABI=x86_64',
+  '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
+  '-DCMAKE_TOOLCHAIN_FILE=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\hms\\native\\build\\cmake\\hmos.toolchain.cmake',
+  '-GNinja',
+  '-DCMAKE_MAKE_PROGRAM=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\openharmony\\native\\build-tools\\cmake\\bin\\ninja.exe',
+  '-DCMAKE_FIND_ROOT_PATH=D:\\Projects\\JoyFit\\JoyFit\\entry\\.cxx\\default\\default\\debug\\hvigor\\x86_64',
+  '-DPACKAGE_FIND_FILE=D:\\Projects\\JoyFit\\JoyFit\\entry\\.cxx\\default\\default\\debug\\hvigor\\x86_64\\summary.cmake',
+  '--no-warn-unused-cli',
+  '-DHMOS_SDK_NATIVE=D:\\Codingggg\\DevEcoStudio\\DevEco Studio\\sdk\\default\\hms\\native'
+]
+[2024-11-28T12:55:40.969] [DEBUG] debug-file - Clean CMakeCache.txt due to outdated CMake configuration.
+[2024-11-28T12:55:40.970] [DEBUG] debug-file - - no fingerprint file, will remove stale cache CMakeCache.txt
+[2024-11-28T12:55:40.972] [DEBUG] debug-file - default@BuildNativeWithCmake work[1] is submitted.
+[2024-11-28T12:55:40.973] [DEBUG] debug-file - default@BuildNativeWithCmake work[1] is pushed to ready queue.
+[2024-11-28T12:55:40.974] [DEBUG] debug-file - A work dispatched to worker[15] failed because unable to get work from ready queue.
+[2024-11-28T12:55:40.974] [DEBUG] debug-file - A work dispatched to worker[14] failed because of worker busy.
+[2024-11-28T12:55:40.974] [DEBUG] debug-file - Create  resident worker with id: 13.
+[2024-11-28T12:55:40.975] [DEBUG] debug-file - default@BuildNativeWithCmake work[1] has been dispatched to worker[13].
+[2024-11-28T12:55:40.975] [DEBUG] debug-file - default@BuildNativeWithCmake work[1] is dispatched.
+[2024-11-28T12:55:40.975] [DEBUG] debug-file - entry : default@BuildNativeWithCmake cost memory 1.6428298950195312
+[2024-11-28T12:55:42.004] [DEBUG] debug-file - Not searching for unused variables given on the command line.
+
+[2024-11-28T12:55:42.004] [DEBUG] debug-file - Not searching for unused variables given on the command line.
+
+[2024-11-28T12:55:42.006] [WARN] debug-file - CMake Deprecation Warning at CMakeLists.txt:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+
+[2024-11-28T12:55:42.006] [WARN] debug-file - CMake Deprecation Warning at CMakeLists.txt:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+
+[2024-11-28T12:55:42.675] [DEBUG] debug-file - -- The C compiler identification is Clang 15.0.4
+
+[2024-11-28T12:55:42.675] [DEBUG] debug-file - -- The C compiler identification is Clang 15.0.4
+
+[2024-11-28T12:55:43.075] [DEBUG] debug-file - -- The CXX compiler identification is Clang 15.0.4
+
+[2024-11-28T12:55:43.075] [DEBUG] debug-file - -- The CXX compiler identification is Clang 15.0.4
+
+[2024-11-28T12:55:43.482] [DEBUG] debug-file - -- Detecting C compiler ABI info
+
+[2024-11-28T12:55:43.482] [DEBUG] debug-file - -- Detecting C compiler ABI info
+
+[2024-11-28T12:55:43.904] [DEBUG] debug-file - -- Detecting C compiler ABI info - done
+
+[2024-11-28T12:55:43.904] [DEBUG] debug-file - -- Detecting C compiler ABI info - done
+
+[2024-11-28T12:55:43.922] [DEBUG] debug-file - -- Check for working C compiler: D:/Codingggg/DevEcoStudio/DevEco Studio/sdk/default/openharmony/native/llvm/bin/clang.exe - skipped
+
+[2024-11-28T12:55:43.922] [DEBUG] debug-file - -- Check for working C compiler: D:/Codingggg/DevEcoStudio/DevEco Studio/sdk/default/openharmony/native/llvm/bin/clang.exe - skipped
+
+[2024-11-28T12:55:43.930] [DEBUG] debug-file - -- Detecting C compile features
+
+[2024-11-28T12:55:43.930] [DEBUG] debug-file - -- Detecting C compile features
+
+[2024-11-28T12:55:43.940] [DEBUG] debug-file - -- Detecting C compile features - done
+
+[2024-11-28T12:55:43.940] [DEBUG] debug-file - -- Detecting C compile features - done
+
+[2024-11-28T12:55:44.031] [DEBUG] debug-file - -- Detecting CXX compiler ABI info
+
+[2024-11-28T12:55:44.031] [DEBUG] debug-file - -- Detecting CXX compiler ABI info
+
+[2024-11-28T12:55:44.407] [DEBUG] debug-file - -- Detecting CXX compiler ABI info - done
+
+[2024-11-28T12:55:44.407] [DEBUG] debug-file - -- Detecting CXX compiler ABI info - done
+
+[2024-11-28T12:55:44.423] [DEBUG] debug-file - -- Check for working CXX compiler: D:/Codingggg/DevEcoStudio/DevEco Studio/sdk/default/openharmony/native/llvm/bin/clang++.exe - skipped
+
+[2024-11-28T12:55:44.424] [DEBUG] debug-file - -- Detecting CXX compile features
+
+[2024-11-28T12:55:44.424] [DEBUG] debug-file - -- Check for working CXX compiler: D:/Codingggg/DevEcoStudio/DevEco Studio/sdk/default/openharmony/native/llvm/bin/clang++.exe - skipped
+
+[2024-11-28T12:55:44.424] [DEBUG] debug-file - -- Detecting CXX compile features
+
+[2024-11-28T12:55:44.424] [DEBUG] debug-file - -- Detecting CXX compile features - done
+
+[2024-11-28T12:55:44.424] [DEBUG] debug-file - -- Detecting CXX compile features - done
+
+[2024-11-28T12:55:44.438] [DEBUG] debug-file - -- Configuring done (2.5s)
+
+[2024-11-28T12:55:44.438] [DEBUG] debug-file - -- Configuring done (2.5s)
+
+[2024-11-28T12:55:44.447] [DEBUG] debug-file - -- Generating done (0.0s)
+
+[2024-11-28T12:55:44.447] [DEBUG] debug-file - -- Generating done (0.0s)
+
+[2024-11-28T12:55:44.521] [DEBUG] debug-file - -- Build files have been written to: D:/Projects/JoyFit/JoyFit/entry/.cxx/default/default/debug/x86_64
+
+[2024-11-28T12:55:44.521] [DEBUG] debug-file - -- Build files have been written to: D:/Projects/JoyFit/JoyFit/entry/.cxx/default/default/debug/arm64-v8a
+
+[2024-11-28T12:55:44.528] [DEBUG] debug-file - worker[13] has one work done.
+[2024-11-28T12:55:44.557] [DEBUG] debug-file - worker[14] has one work done.
+[2024-11-28T12:55:44.604] [DEBUG] debug-file - default@BuildNativeWithCmake work[1] done.
+[2024-11-28T12:55:44.604] [DEBUG] debug-file - A work dispatched to worker[13] failed because unable to get work from ready queue.
+[2024-11-28T12:55:44.605] [DEBUG] debug-file - default@BuildNativeWithCmake work[0] done.
+[2024-11-28T12:55:44.605] [DEBUG] debug-file - A work dispatched to worker[14] failed because unable to get work from ready queue.
+[2024-11-28T12:55:44.605] [INFO] debug-file - Finished :entry:default@BuildNativeWithCmake... after 3 s 665 ms 
+[2024-11-28T12:55:44.608] [DEBUG] debug-file - Executing task :entry:compileNative
+[2024-11-28T12:55:44.608] [DEBUG] debug-file - entry : compileNative cost memory 0.01178741455078125
+[2024-11-28T12:55:44.608] [DEBUG] debug-file - runTaskFromQueue task cost before running: 5 s 530 ms 
+[2024-11-28T12:55:44.608] [INFO] debug-file - Finished :entry:compileNative... after 1 ms 
+[2024-11-28T12:55:44.617] [DEBUG] debug-file - BUILD SUCCESSFUL in 5 s 539 ms 
+[2024-11-28T12:55:44.618] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\AppScope\app.json5 cache by regenerate.
+[2024-11-28T12:55:44.619] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\entry\src\main\module.json5 cache by regenerate.
+[2024-11-28T12:55:44.619] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\build-profile.json5 cache by regenerate.
+[2024-11-28T12:55:44.619] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\entry\build-profile.json5 cache by regenerate.
+[2024-11-28T12:55:44.620] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\entry\src\main\resources\base\profile\main_pages.json cache by regenerate.
+[2024-11-28T12:55:44.620] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\hvigor\hvigor-config.json5 cache by regenerate.
+[2024-11-28T12:55:44.620] [DEBUG] debug-file - Update task entry:default@PreBuild input file:D:\Projects\JoyFit\JoyFit\entry\oh-package.json5 cache by regenerate.
+[2024-11-28T12:55:44.621] [DEBUG] debug-file - Incremental task entry:default@PreBuild post-execution cost:3 ms .
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Cleanup worker 0.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Worker 0 has been cleaned up.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Current idle worker size: 3.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Current resident worker size: 4.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Cleanup worker 1.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Worker 1 has been cleaned up.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Current idle worker size: 2.
+[2024-11-28T12:55:44.635] [DEBUG] debug-file - Current resident worker size: 4.
+[2024-11-28T12:55:44.636] [DEBUG] debug-file - hvigor build process will be closed.
+[2024-11-28T12:55:44.640] [DEBUG] debug-file - session manager: send message to worker process.
+[2024-11-28T12:55:44.640] [DEBUG] debug-file - session manager: send message to worker process.
+[2024-11-28T12:55:44.641] [DEBUG] debug-file - worker[0] exits with exit code 1.
+[2024-11-28T12:55:44.641] [DEBUG] debug-file - worker[1] exits with exit code 1.
+[2024-11-28T12:55:44.642] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
+[2024-11-28T12:55:44.642] [DEBUG] debug-file - watch worker: worker id should be larger than 0. Nothing will be sent to any worker thread.
