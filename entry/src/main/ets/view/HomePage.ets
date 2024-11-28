@@ -53,7 +53,6 @@ export default struct HomePage {
 @Preview
 @Component
 struct PlanTypeSelectButton {
-
 }
 
 
