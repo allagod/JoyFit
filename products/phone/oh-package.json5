@@ -1,0 +1,16 @@
+{
+  "name": "phone",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    // 本地源码引入，可引入本地其他模块的源码
+    "exercise": "file:../../features/exercise",
+    "mine": "file:../../features/mine",
+    "uicomponents": 'file:../../commons/uicomponents',
+    "utils": 'file:../../commons/utils',
+    "@hw-agconnect/auth": "^1.0.2"
+  }
+}

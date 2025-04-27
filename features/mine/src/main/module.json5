@@ -1,0 +1,23 @@
+{
+  "module": {
+    "name": "mine",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1"
+    ],
+    "metadata": [ // 配置信息如下
+      {
+        "name": "client_id",
+        "value": "112754605"
+      }
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.INTERNET"
+      }
+    ]
+    //"routerMap": "$profile:route_map"
+  }
+}
