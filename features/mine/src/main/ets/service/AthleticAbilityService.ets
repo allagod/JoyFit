@@ -17,42 +17,36 @@ export class AthleticAbilityService{
   }
 
   // 用户更新运动能力信息
-  async updateInfo(newAthleticAbilityInfo: athleticAbility, uid: string) {
-    if(!uid||!newAthleticAbilityInfo){
-      console.error('Invalid parameters: BodyFat or uid is missing');
+  async updateInfo(newInfo: athleticAbility, userId: string): Promise<boolean> {
+    if (!userId || !newInfo) {
+      console.error('参数错误：缺少 userId 或运动能力信息');
       return false;
     }
-    let UserAthletic=new AthleticAbility();
+
+    const ability = new AthleticAbility();
+    ability.UserID = userId;
+    ability.RunningDistance = newInfo.runningDistance;
+    ability.PushUpNums = newInfo.pushUpNums;
+    ability.SquatNums = newInfo.squatNums;
+    ability.CrunchNums = newInfo.crunchNums;
+    ability.LastUpdated = DateConverToNum.convertDateToInteger(new Date());
+
     try {
+      const affectedRows = await this.agcDataBase.upsert(ability);
 
-      UserAthletic.UserID=uid;
-      UserAthletic.RunningDistance=newAthleticAbilityInfo.runningDistance;
-      UserAthletic.PushUpNums=newAthleticAbilityInfo.pushUpNums;
-      UserAthletic.SquatNums=newAthleticAbilityInfo.squatNums;
-      UserAthletic.CrunchNums=newAthleticAbilityInfo.crunchNums;
-      let currentDate = new Date();
-      UserAthletic.LastUpdated=DateConverToNum.convertDateToInteger(currentDate);
-
-      // 调用 upsert 方法
-      let num = await this.agcDataBase.upsert(UserAthletic);
-
-      // 根据返回结果判断成功或失败
-      if (num > 0) {
-        console.info(`Successfully updated/inserted ${num} records.`);
+      if (affectedRows > 0) {
+        console.info(`更新成功，共影响 ${affectedRows} 条记录`);
         return true;
       } else {
-
-        console.warn('No records were updated or inserted.');
+        console.warn('没有记录被更新或插入');
         return false;
       }
-    } catch (err) {
-      // 错误处理
-
-
-      console.error(`Failed to upsert, error: `, err);
+    } catch (error) {
+      console.error('更新失败，错误信息：', error);
       return false;
     }
   }
+
 
   async getInfoByUserID(uid:string){
     if (!uid) {

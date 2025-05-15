@@ -49,54 +49,46 @@ export class BodyWeightService {
   }
 
 
-  //用户增加历史体重，会引发BMI更新，作为外部调用接口
-  async addWeight(uid:string,weight:number){
-    if (!weight || !uid) {
-      console.error('Invalid parameters: weight or uid is missing');
+  // 外部接口：新增用户体重记录，若有身高则计算BMI
+  async addWeight(userId: string, weight: number): Promise<boolean> {
+    if (!userId || !weight) {
+      console.error('参数错误：缺少 userId 或 weight');
       return false;
     }
+
+    const record = new WeightData();
+    record.UserID = userId;
+    record.Weight = weight;
+    record.WeightRecordTime = DateConverToNum.convertDateToInteger(new Date());
+
     try {
-      let userweight=new WeightData();
-      userweight.UserID=uid;
-      userweight.Weight=weight;
-      let currentDate = new Date();
-      userweight.WeightRecordTime=DateConverToNum.convertDateToInteger(currentDate);
-      // 获取该用户的身高数据
-      let HeightData = await this.bodyHeightService.getUserHeight(uid);
-      if(!HeightData){
-        console.warn('Height data not found, BMI calculation skipped');
-      }
-      else {
-        if (HeightData != null) {
-          if ( HeightData.Height!=0&&HeightData.Height!=null) {
-            // 计算BMI
-            let newBMI = BmiCalculator.calculateBMI(HeightData.Height, userweight.Weight);
-            userweight.BMI = newBMI;
-          } else {
-            console.warn('Height data is invalid or not found, BMI calculation skipped');
-          }
-        } else {
-          console.warn('Height data not found, BMI calculation skipped');
-        }
-      }
-      // 调用 upsert 方法
-      let num = await this.agcDataBase.upsert([userweight]);
+      // 获取用户身高信息
+      const heightInfo = await this.bodyHeightService.getUserHeight(userId);
 
+      if (heightInfo && heightInfo.Height) {
+        const bmi = BmiCalculator.calculateBMI(heightInfo.Height, weight);
+        record.BMI = bmi;
+      } else {
+        console.warn('未获取到有效身高信息，跳过 BMI 计算');
+      }
 
-      // 根据返回结果判断成功或失败
-      if (num > 0) {
-        console.info(`Successfully updated/inserted ${num} records.`);
+      // 插入或更新体重记录
+      const affectedRows = await this.agcDataBase.upsert([record]);
+
+      if (affectedRows > 0) {
+        console.info(`成功插入/更新体重记录，影响行数：${affectedRows}`);
         return true;
       } else {
-        console.warn('No records were updated or inserted.');
+        console.warn('没有记录被插入或更新');
         return false;
       }
-    } catch (err) {
-      // 错误处理
-      console.error(`Failed to upsert, error: `, err);
+
+    } catch (error) {
+      console.error('插入体重记录失败，错误信息：', error);
       return false;
     }
   }
+
 
   //用户获取历史体重数据
   async getWeightHistory(uid:string){
