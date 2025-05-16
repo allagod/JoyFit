@@ -85,8 +85,6 @@ struct ActionLibraryPage {
               })
           })
         }
-        .height('100%')
-        .backgroundColor('#fff5f5f5')
 
         Column() {
           ForEach(this.nowActionList, (item: Action, index) => {
@@ -104,10 +102,8 @@ struct ActionLibraryPage {
           })
         }
         .height('100%')
+        .width('100%')
       }
-      .width('100%')
-      .height('100%')
-      .padding({top: 20})
     }
 
   }
@@ -127,7 +123,6 @@ struct trainingPartItem {
     }
     .height(50)
     .width(85)
-    .backgroundColor(this.isSelected ? Color.White : '#fff5f5f5')
   }
 }
 
@@ -145,7 +140,7 @@ struct exerciseItem {
         .autoPlay(true)
         .borderRadius(10)
         .controls(false)
-        .loop(true)
+        .loop(false)
       // Image($r(this.action.IntroductionVideo))
       //   .height(70)
       //   .borderRadius(10)
