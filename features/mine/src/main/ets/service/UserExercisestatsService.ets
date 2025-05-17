@@ -20,24 +20,21 @@ export class UserExerciseStatsService {
     return UserExerciseStatsService.instance;
   }
 
-  //转化为数据库表的格式，类内调用
-  private ToBean(ExerciseStats:userExerciseStates,uid:string){
-    let recordExerciseStates= new ExerciseStates();
-    recordExerciseStates.UserID=uid;
-    //recordExerciseStates.TimeStamp=ExerciseStats.timeStamp.valueOf();
-    recordExerciseStates.TimeStamp=DateConverToNum.convertDateToInteger(ExerciseStats.timeStamp);
-    recordExerciseStates.TotalSteps=ExerciseStats.totalSteps;
-    recordExerciseStates.TotalExerciseTime=ExerciseStats.totalExerciseTime;
-    //卡路里可能需要修改
-    recordExerciseStates.TotalCaloriesBurned=ExerciseStats.totalCalorisesBurned;
+  // 将用户运动状态对象转换为数据库记录对象
+  private mapToRecord(stats: userExerciseStates, userId: string): ExerciseStates {
+    const record = new ExerciseStates();
+    record.UserID = userId;
+    record.TimeStamp = DateConverToNum.convertDateToInteger(stats.timeStamp);
+    record.TotalSteps = stats.totalSteps;
+    record.TotalExerciseTime = stats.totalExerciseTime;
+    record.TotalCaloriesBurned = stats.totalCalorisesBurned; // 若有拼写错误建议修正
 
-    return recordExerciseStates;
-
+    return record;
   }
 
-  //更新用户的当日运动情况
-  async updateUserExerciseStates(ExerciseStats: userExerciseStates, uid: string): Promise<boolean> {
-    let record = this.ToBean(ExerciseStats, uid);  // 假设 ToBean 是用于将 ExerciseStats 转换为数据库记录的函数
+  // 更新用户的当日运动情况
+  async updateUserExerciseStates(stats: userExerciseStates, userId: string): Promise<boolean> {
+    const record = this.mapToRecord(stats, userId);
 
     try {
       const data: cloudFunction.FunctionResult = await new Promise((resolve, reject) => {
@@ -51,32 +48,21 @@ export class UserExerciseStatsService {
           }
         }, (err: BusinessError, result: cloudFunction.FunctionResult) => {
           if (err) {
-            console.error(`Failed to call the function, Code: ${err.code}, message: ${err.message}`);
-            reject({ message: err.message });  // Reject with error message, if needed
+            console.error(`Cloud function failed. Code: ${err.code}, Message: ${err.message}`);
+            reject(err);
           } else {
-            console.info(`Succeeded in calling the function, result: ${JSON.stringify(result.result)}`);
+            console.info(`Cloud function succeeded. Result: ${JSON.stringify(result.result)}`);
             resolve(result);
           }
         });
       });
-      // 根据云函数返回的结果判断是否成功
-      if (data.result) {
-        return true;  // 成功的情况
-      }
 
-      // 默认返回 false，如果返回的结果不符合预期
-      console.warn('Cloud function returned unexpected result:', data);
-      return false;
+      return !!data.result;
     } catch (error) {
-      // 捕获异常，记录错误并返回 false
-      console.error('Error occurred:', error);
+      console.error('Exception occurred while updating user exercise states:', error);
       return false;
     }
   }
-
-
-
-
 
   //按照日期查看用户运动情况
   async getUserExerciseStates(uid:string,dateinteger:number):Promise<ExerciseStates>{
