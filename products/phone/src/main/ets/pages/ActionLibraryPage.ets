@@ -19,14 +19,14 @@ class exercise {
 @Entry
 @ComponentV2
 struct ActionLibraryPage {
-  @Local selectedItem: number = 0
-  @Local chestActionList: Action[] = []
-  @Local backActionList: Action[] = []
-  @Local legActionList: Action[] = []
   @Local armsActionList: Action[] = []
   @Local abdomenActionList: Action[] = []
   @Local shouldersActionList: Action[] = []
   @Local nowActionList: Action[] = []
+  @Local selectedItem: number = 0
+  @Local chestActionList: Action[] = []
+  @Local backActionList: Action[] = []
+  @Local legActionList: Action[] = []
 
 
   private trainingPartList: string[] = ['胸', '背', '肩', '手臂', '腹部', '腿']
@@ -75,13 +75,13 @@ struct ActionLibraryPage {
               trainingPartName: item
             })
               .onClick(() => {
-                this.selectedItem = index
-                if(index == 0) this.nowActionList = this.chestActionList
-                if(index == 1) this.nowActionList = this.backActionList
-                if(index == 2) this.nowActionList = this.shouldersActionList
-                if(index == 3) this.nowActionList = this.armsActionList
-                if(index == 4) this.nowActionList = this.abdomenActionList
-                if(index == 5) this.nowActionList = this.legActionList
+              this.selectedItem = index
+              if(index == 0) this.nowActionList = this.chestActionList
+              if(index == 1) this.nowActionList = this.backActionList
+              if(index == 2) this.nowActionList = this.shouldersActionList
+              if(index == 3) this.nowActionList = this.armsActionList
+              if(index == 4) this.nowActionList = this.abdomenActionList
+              if(index == 5) this.nowActionList = this.legActionList
               })
           })
         }
@@ -106,6 +106,23 @@ struct ActionLibraryPage {
       }
     }
 
+    Column() {
+          ForEach(this.nowActionList, (item: Action, index) => {
+            exerciseItem({
+              action: item
+            })
+              .onClick(() => {
+                router.pushUrl({
+                  url: "pages/CreatePlanPage2",
+                  params: {
+                    workoutPlan: this.emptyWorkoutPlan
+                  }
+                })
+              })
+          })
+        }
+        .height('100%')
+        .width('100%')
   }
 }
 
@@ -147,8 +164,8 @@ struct exerciseItem {
       Column() {
         Text(this.action.ActionName)
         Text(this.action.Note)
-          .fontSize(14)
-          .fontColor('#66000000')
+          .fontSize(16)
+          .fontColor('#66006600')
       }
       .height('100%')
       .justifyContent(FlexAlign.SpaceBetween)

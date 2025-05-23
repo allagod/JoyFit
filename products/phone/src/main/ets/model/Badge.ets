@@ -10,4 +10,11 @@ export default class Badge {
     this.name = name
     this.time = time
   }
+
+  constructor(imageUrl: string, description: string, name: string, time: string) {
+    this.imageUrl = imageUrl
+    this.description = description
+    this.name = name
+    this.time = time
+  }
 }
