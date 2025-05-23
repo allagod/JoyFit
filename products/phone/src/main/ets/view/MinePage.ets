@@ -57,7 +57,7 @@ export default struct MinePage {
                 this.maskImgY = 1
               })
             })
-          }.width("100%")
+          }.width("100%").borderRadius(10)
         }
         .backgroundColor(Color.White)
         .padding(10)
