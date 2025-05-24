@@ -132,80 +132,57 @@ export class ActionRepository {
   }
 
 
-  //addNewAction(newAction: Action): boolean
+  // 新增动作并与用户关联
   async addNewAction(newAction: action, uid: string): Promise<boolean> {
-    // 转化为数据库格式
-    let waittoadd = this.ToBean(newAction);
+    const actionRecord = this.ToBean(newAction);
 
-    if (waittoadd.ActionID != null) {
-      let useraction = this.ToBeanUserAction(uid, waittoadd.ActionID);
+    // 若动作ID不存在，直接返回失败
+    if (!actionRecord.ActionID) return false;
 
-      // 使用Promise包装异步操作
-      try {
-        // 第一次异步调用
-        const upsertActionResult = await new Promise<boolean>((resolve, reject) => {
-          cloudFunction.call({
-            name: 'action-bycyb-cloud-function',
-            version: '$latest',
-            timeout: 10 * 1000,
-            data: {
-              operation: 'upsertAction',
-              records: waittoadd
-            }
-          }, (err: BusinessError, data: cloudFunction.FunctionResult) => {
-            if (err) {
-              console.error(`Failed to call the function, Code: ${err.code}, message: ${err.message}`);
-              reject(false);  // 错误时reject
-            } else {
-              console.info(`Succeeded in calling the function, result: ${JSON.stringify(data.result)}`);
-              resolve(true);  // 成功时resolve
-            }
-          });
-        });
+    const userActionRecord = this.ToBeanUserAction(uid, actionRecord.ActionID);
 
-        // 如果第一个调用失败，直接返回false
-        if (!upsertActionResult) {
-          return false;
-        }
+    try {
+      // 上传或更新 Action 记录
+      const upsertActionSuccess = await this.invokeCloudFunction('upsertAction', actionRecord);
+      if (!upsertActionSuccess) return false;
 
-        // 第二次异步调用
-        const upsertUserActionResult = await new Promise<boolean>((resolve, reject) => {
-          cloudFunction.call({
-            name: 'action-bycyb-cloud-function',
-            version: '$latest',
-            timeout: 10 * 1000,
-            data: {
-              operation: 'upsertUserAction',
-              records: useraction
-            }
-          }, (err: BusinessError, data: cloudFunction.FunctionResult) => {
-            if (err) {
-              console.error(`Failed to call the function, Code: ${err.code}, message: ${err.message}`);
-              reject(false);  // 错误时reject
-            } else {
-              console.info(`Succeeded in calling the function, result: ${JSON.stringify(data.result)}`);
-              resolve(true);  // 成功时resolve
-            }
-          });
-        });
+      // 上传或更新 UserAction 记录
+      const upsertUserActionSuccess = await this.invokeCloudFunction('upsertUserAction', userActionRecord);
+      if (!upsertUserActionSuccess) return false;
 
-        // 如果第二个调用失败，直接返回false
-        if (!upsertUserActionResult) {
-          return false;
-        }
-
-        // 如果两个调用都成功，返回true
-        return true;
-
-      } catch (error) {
-        // 捕获到任何错误时，返回false
-        console.error("Error in addNewAction:", error);
-        return false;
-      }
-    } else {
+      return true;
+    } catch (error) {
+      console.error("addNewAction error:", error);
       return false;
     }
   }
+
+  // 封装 cloudFunction 调用逻辑
+  private async invokeCloudFunction(operation: string, records: any): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+     cloudFunction.call(
+       {
+          name: 'action-bycyb-cloud-function',
+          version: '$latest',
+          timeout: 10000,
+          data: {
+            operation,
+            records
+          }
+        },
+        (err: BusinessError, data: cloudFunction.FunctionResult) => {
+          if (err) {
+            console.error(`Cloud function [${operation}] failed:`, err);
+            reject(false);
+          } else {
+            console.info(`Cloud function [${operation}] success:`, data.result);
+            resolve(true);
+          }
+        }
+      );
+    });
+  }
+
 
 
   //deleteMyAction
