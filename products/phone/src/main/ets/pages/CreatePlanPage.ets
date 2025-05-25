@@ -17,7 +17,8 @@ class SysRecord {
     this.state = state
     if(state == 'Completed') this.color = '#a344ab30'
     if(state == 'Pending') this.color = "#c42191fa"
-    if(state == 'Abandoned') this.color = '#bac63434'
+    this.index = index
+    this.state = state
   }
 }
 
@@ -62,6 +63,24 @@ struct CreatePlanPage {
 
   }
 
+    aboutappear(): void {
+    const params = router.getParams() as ParamsObj
+    this.workoutPlan = params.workoutPlan
+    if(this.workoutPlan.StartDate instanceof Date)
+      this.startDate = this.workoutPlan.StartDate
+    if(this.workoutPlan.EndDate instanceof Date)
+      this.endDate = this.workoutPlan.EndDate
+    for(let i = 0; i < this.workoutPlan.DayOfWeek.length; i += 2)
+      this.weekdayIsSelected[(Number(this.workoutPlan.DayOfWeek[i]) + 6) % 7] = true
+    if(this.workoutPlan.PlanState != undefined)
+      this.state = this.workoutPlan.PlanState
+    if(this.state == 'NotStarted') {this.title = '计划创建'; this.startEndDatePrompt = '点击修改起止日期'; this.workoutDayPrompt = '点击选择训练日'}
+    else {this.title = '计划详情'; this.startEndDatePrompt = '训练起止日期'; this.workoutDayPrompt = '训练日'}
+
+    this.actionList[0].ActionName = '卷腹'
+
+  }
+
   build() {
     Column() {
       Row() {
@@ -71,14 +90,6 @@ struct CreatePlanPage {
             router.back()
           })
         Text(this.title)
-        Text('完成')
-          .backgroundColor("#0bbe86")
-          .fontColor(Color.White)
-          .padding({top: 5, bottom: 5, left: 10, right: 10})
-          .borderRadius(10)
-          .onClick(() => {
-            router.back()
-          })
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
@@ -96,10 +107,10 @@ struct CreatePlanPage {
           Row() {
             if(this.workoutPlan.CoverPicture!=undefined)
             Image($r(this.workoutPlan.CoverPicture))
-              .height(80)
-              .width(80)
-              .borderRadius(15)
-              .margin({right: 10})
+              .height(76)
+              .width(8)
+              .borderRadius(65)
+              .margin({right: 45})
             else
             Row() {
               Text('+')
