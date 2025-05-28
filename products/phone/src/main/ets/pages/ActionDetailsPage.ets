@@ -22,16 +22,16 @@ struct ActionDetailsPage {
   private action: Action = new Action()
   private actionMainTrainingPart: string = ''
 
-  aboutToAppear(): void {
-    const params = router.getParams() as paraObj
-    this.action = params.action
-    if(this.action.MainTrainingPart == 'Chest') this.actionMainTrainingPart = '胸部'
-    if(this.action.MainTrainingPart == 'Back') this.actionMainTrainingPart = '背部'
-    if(this.action.MainTrainingPart == 'Abdomen') this.actionMainTrainingPart = '腹部'
-    if(this.action.MainTrainingPart == 'Shoulders') this.actionMainTrainingPart = '肩部'
-    if(this.action.MainTrainingPart == 'Arms') this.actionMainTrainingPart = '手臂'
-    if(this.action.MainTrainingPart == 'Leg') this.actionMainTrainingPart = '腿部'
+  const partMap: { [key: string]: string } = {
+    Chest: '胸部',
+    Back: '背部',
+    Abdomen: '腹部',
+    Shoulders: '肩部',
+    Arms: '手臂',
+    Leg: '腿部'
   }
+  this.actionMainTrainingPart = partMap[this.action.MainTrainingPart] || ''
+
 
   build() {
     Stack() {
