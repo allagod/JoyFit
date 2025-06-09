@@ -401,3 +401,218 @@ export class ActionRepository {
     }
   }
 }
+
+
+/**
+ * 获取用户收藏的动作列表。
+ * 
+ * @param uid - 用户 ID
+ * @returns 收藏的动作数组，或 false（调用失败）
+ */
+async getUserFavoriteActions(uid: string): Promise<Action[] | boolean> {
+  try {
+    const data: cloudFunction.FunctionResult = await new Promise((resolve, reject) => {
+      cloudFunction.call({
+        name: 'action-bycyb-cloud-function',
+        version: '$latest',
+        timeout: 10000,
+        data: {
+          operation: 'queryFavoriteActions',
+          records: uid
+        }
+      }, (err, data) => {
+        if (err) {
+          console.error("Error querying favorite actions:", err);
+          reject(false);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    const cfReturn = data.result as ResultofActionSearch;
+    return cfReturn.result;
+  } catch (error) {
+    console.error("Failed to get favorite actions:", error);
+    return false;
+  }
+}
+
+/**
+ * 将指定动作为用户添加到收藏夹。
+ * 
+ * @param uid - 用户 ID
+ * @param actionID - 动作 ID
+ * @returns 操作是否成功
+ */
+async markActionAsFavorite(uid: string, actionID: string): Promise<boolean> {
+  try {
+    return await this.invokeCloudFunction('addFavoriteAction', {
+      UserID: uid,
+      ActionID: actionID
+    });
+  } catch (err) {
+    console.error("Failed to mark action as favorite:", err);
+    return false;
+  }
+}
+
+/**
+ * 取消收藏指定动作。
+ * 
+ * @param uid - 用户 ID
+ * @param actionID - 动作 ID
+ * @returns 操作是否成功
+ */
+async unmarkActionAsFavorite(uid: string, actionID: string): Promise<boolean> {
+  try {
+    return await this.invokeCloudFunction('removeFavoriteAction', {
+      UserID: uid,
+      ActionID: actionID
+    });
+  } catch (err) {
+    console.error("Failed to unmark favorite action:", err);
+    return false;
+  }
+}
+
+/**
+ * 获取系统为用户推荐的动作，通常根据用户偏好和训练部位生成。
+ * 
+ * @param uid - 用户 ID
+ * @param bodyPart - 目标训练部位（如“腿部”、“胸部”等）
+ * @returns 推荐动作列表，或 false（调用失败）
+ */
+async getRecommendedActions(uid: string, bodyPart: string): Promise<Action[] | boolean> {
+  try {
+    const data: cloudFunction.FunctionResult = await new Promise((resolve, reject) => {
+      cloudFunction.call({
+        name: 'action-bycyb-cloud-function',
+        version: '$latest',
+        timeout: 10000,
+        data: {
+          operation: 'getRecommendedActions',
+          records: {
+            UserID: uid,
+            BodyPart: bodyPart
+          }
+        }
+      }, (err, data) => {
+        if (err) {
+          console.error("Error getting recommended actions:", err);
+          reject(false);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    const cfReturn = data.result as ResultofActionSearch;
+    return cfReturn.result;
+  } catch (error) {
+    console.error("Failed to get recommended actions:", error);
+    return false;
+  }
+}
+
+/**
+ * 获取用户最近使用过的动作记录，常用于快速复用。
+ * 
+ * @param uid - 用户 ID
+ * @returns 最近使用的动作列表，或 false（调用失败）
+ */
+async getRecentlyUsedActions(uid: string): Promise<Action[] | boolean> {
+  try {
+    const data: cloudFunction.FunctionResult = await new Promise((resolve, reject) => {
+      cloudFunction.call({
+        name: 'action-bycyb-cloud-function',
+        version: '$latest',
+        timeout: 10000,
+        data: {
+          operation: 'queryRecentActions',
+          records: uid
+        }
+      }, (err, data) => {
+        if (err) {
+          console.error("Error fetching recent actions:", err);
+          reject(false);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    const cfReturn = data.result as ResultofActionSearch;
+    return cfReturn.result;
+  } catch (error) {
+    console.error("Failed to get recently used actions:", error);
+    return false;
+  }
+}
+
+/**
+ * 按动作名称进行模糊搜索，支持中文/英文关键词。
+ * 
+ * @param name - 动作名称或关键词
+ * @returns 匹配的动作数组，或 false（调用失败）
+ */
+async searchActionsByName(name: string): Promise<Action[] | boolean> {
+  try {
+    const data: cloudFunction.FunctionResult = await new Promise((resolve, reject) => {
+      cloudFunction.call({
+        name: 'action-bycyb-cloud-function',
+        version: '$latest',
+        timeout: 10000,
+        data: {
+          operation: 'searchActionByName',
+          records: name
+        }
+      }, (err, data) => {
+        if (err) {
+          console.error("Error searching actions:", err);
+          reject(false);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    const cfReturn = data.result as ResultofActionSearch;
+    return cfReturn.result;
+  } catch (error) {
+    console.error("Failed to search actions by name:", error);
+    return false;
+  }
+}
+
+/**
+ * 获取所有动作的使用频率统计，用于推荐排序或热度展示。
+ * 
+ * @returns 一个以动作 ID 为键、使用次数为值的对象，或 false（调用失败）
+ */
+async getActionUsageStats(): Promise<{ [actionID: string]: number } | boolean> {
+  try {
+    const data: cloudFunction.FunctionResult = await new Promise((resolve, reject) => {
+      cloudFunction.call({
+        name: 'action-bycyb-cloud-function',
+        version: '$latest',
+        timeout: 10000,
+        data: {
+          operation: 'getActionUsageStats',
+        }
+      }, (err, data) => {
+        if (err) {
+          console.error("Error fetching usage stats:", err);
+          reject(false);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    return data.result;
+  } catch (error) {
+    console.error("Failed to get action usage stats:", error);
+    return false;
+  }
+}
