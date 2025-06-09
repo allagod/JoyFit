@@ -216,3 +216,225 @@ export class WorkoutPlanService extends ExercisePlanService {
     }
   };
 }
+
+
+  /**
+   * 获取某计划的所有任务，按状态分类返回
+   */
+  public async getTasksByPlanID(planID: string): Promise<{ pending: PlanTask[], completed: PlanTask[], cancelled: PlanTask[] }> {
+    const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID);
+    const tasks: PlanTask[] = await this.agcDataBase.query(condition);
+
+    const pending = tasks.filter(t => t.State === 'Pending');
+    const completed = tasks.filter(t => t.State === 'Completed');
+    const cancelled = tasks.filter(t => t.State === 'Cancelled');
+
+    return { pending, completed, cancelled };
+  }
+
+  /**
+   * 标记某任务为完成
+   */
+  public async completeTask(taskID: string): Promise<boolean> {
+    try {
+      const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('TaskID', taskID);
+      const tasks: PlanTask[] = await this.agcDataBase.query(condition);
+      if (tasks.length === 0) return false;
+
+      const task = tasks[0];
+      task.State = 'Completed';
+      await this.agcDataBase.upsert(task);
+      return true;
+    } catch (err) {
+      console.error('完成任务失败:', err);
+      return false;
+    }
+  }
+
+  /**
+   * 计算计划的执行进度百分比（完成任务数/总任务数）
+   */
+  public async getPlanProgress(planID: string): Promise<number> {
+    const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID);
+    const tasks: PlanTask[] = await this.agcDataBase.query(condition);
+    if (tasks.length === 0) return 0;
+
+    const completedCount = tasks.filter(t => t.State === 'Completed').length;
+    return Math.round((completedCount / tasks.length) * 100);
+  }
+
+  /**
+   * 按关键词搜索计划名称（模糊搜索）
+   */
+  public async searchPlansByName(userID: string, keyword: string, limit = 20, offset = 0): Promise<WorkoutPlan[]> {
+    // 注意：具体实现依赖数据库是否支持模糊搜索，这里用简单包含示意
+    const condition = new cloudDatabase.DatabaseQuery(WorkoutPlan)
+      .equalTo('UserID', userID)
+      .and()
+      .contains('PlanName', keyword); // 假设contains支持模糊搜索
+
+    const plans = await this.agcDataBase.query(condition, { limit, offset });
+    return plans;
+  }
+
+  /**
+   * 记录计划操作日志（简易示例）
+   */
+  public async logPlanOperation(planID: string, userID: string, operation: string, detail?: string) {
+    const log = {
+      LogID: UUIDGenerator.getID(),
+      PlanID: planID,
+      UserID: userID,
+      Operation: operation,
+      Detail: detail || '',
+      Timestamp: new Date(),
+    };
+    await this.agcDataBase.upsert(log);
+  }
+
+  /**
+   * 查询某用户所有计划的统计数据（计划数，完成数，放弃数等）
+   */
+  public async getUserPlanStatistics(userID: string) {
+    const planStates = ['NotStarted', 'InProgress', 'Completed', 'Abandoned'];
+    const stats: Record<string, number> = {};
+    for (const state of planStates) {
+      const condition = new cloudDatabase.DatabaseQuery(WorkoutPlan)
+        .equalTo('UserID', userID)
+        .and()
+        .equalTo('PlanState', state);
+      const plans = await this.agcDataBase.query(condition);
+      stats[state] = plans.length;
+    }
+    return stats;
+  }
+
+  /**
+   * 批量更新多个任务状态（例如批量取消）
+   */
+  public async batchUpdateTasksState(taskIDs: string[], newState: string): Promise<boolean> {
+    try {
+      for (const id of taskIDs) {
+        const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('TaskID', id);
+        const tasks = await this.agcDataBase.query(condition);
+        if (tasks.length > 0) {
+          const task = tasks[0];
+          task.State = newState;
+          await this.agcDataBase.upsert(task);
+        }
+      }
+      return true;
+    } catch (err) {
+      console.error('批量更新任务状态失败:', err);
+      return false;
+    }
+  }
+
+
+public async autoUpdatePlanStates(userID: string): Promise<void> {
+  const now = new Date();
+  const condition = new cloudDatabase.DatabaseQuery(WorkoutPlan)
+    .equalTo('UserID', userID)
+    .and()
+    .notEqualTo('PlanState', 'Completed')
+    .and()
+    .notEqualTo('PlanState', 'Abandoned');
+
+  const plans = await this.agcDataBase.query(condition);
+  for (const plan of plans) {
+    if (plan.StartDate && plan.EndDate) {
+      if (now < plan.StartDate && plan.PlanState !== 'NotStarted') {
+        plan.PlanState = 'NotStarted';
+        await this.agcDataBase.upsert(plan);
+      } else if (now >= plan.StartDate && now <= plan.EndDate && plan.PlanState !== 'InProgress') {
+        plan.PlanState = 'InProgress';
+        await this.agcDataBase.upsert(plan);
+      } else if (now > plan.EndDate && plan.PlanState !== 'Completed') {
+        plan.PlanState = 'Completed';
+        await this.agcDataBase.upsert(plan);
+      }
+    }
+  }
+}
+
+
+public async regenerateTasksForPlan(plan: workoutPlan): Promise<boolean> {
+  try {
+    if (!plan.PlanID) return false;
+    await this.deleteTask(plan.PlanID); // 删除旧任务
+    const dates = this.getExecutionDates(plan.StartDate, plan.EndDate, plan.DayOfWeek);
+    const newTasks = dates.map(date => this.taskToBean(plan.PlanID!, plan.UserID!, date));
+    await this.agcDataBase.upsert(newTasks);
+    return true;
+  } catch (err) {
+    console.error('重新生成任务失败:', err);
+    return false;
+  }
+}
+
+public async importPlanFromJSON(jsonStr: string): Promise<boolean> {
+  try {
+    const data = JSON.parse(jsonStr);
+    if (!data.plan) return false;
+
+    // 先删除原计划
+    if (data.plan.PlanID) {
+      await this.deletePlan(data.plan.PlanID);
+    }
+
+    // 新计划
+    await this.agcDataBase.upsert(data.plan);
+
+    // 相关动作和任务
+    if (Array.isArray(data.actions)) {
+      await this.agcDataBase.upsert(data.actions);
+    }
+    if (Array.isArray(data.tasks)) {
+      await this.agcDataBase.upsert(data.tasks);
+    }
+
+    return true;
+  } catch (err) {
+    console.error('导入计划失败:', err);
+    return false;
+  }
+}
+
+public async getPlanReport(planID: string) {
+  const tasks = await this.agcDataBase.query(new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID));
+  if (tasks.length === 0) return null;
+
+  const completedTasks = tasks.filter(t => t.State === 'Completed');
+  const completionRate = completedTasks.length / tasks.length;
+
+  // 假设每个任务有记录WorkoutRecord（含时间）
+  const records = await this.agcDataBase.query(new cloudDatabase.DatabaseQuery(WorkoutRecord).equalTo('PlanID', planID));
+  const totalTime = records.reduce((sum, r) => sum + (r.Duration || 0), 0);
+  const avgTime = records.length ? totalTime / records.length : 0;
+
+  return {
+    totalTasks: tasks.length,
+    completedTasks: completedTasks.length,
+    completionRate,
+    totalTime,
+    avgTime,
+  };
+}
+
+public async getUpcomingTasks(userID: string, daysAhead = 1): Promise<PlanTask[]> {
+  const now = new Date();
+  const futureDate = new Date();
+  futureDate.setDate(now.getDate() + daysAhead);
+
+  const condition = new cloudDatabase.DatabaseQuery(PlanTask)
+    .equalTo('UserID', userID)
+    .and()
+    .equalTo('State', 'Pending')
+    .and()
+    .greaterThanOrEqualTo('ExecutedDate', now)
+    .and()
+    .lessThanOrEqualTo('ExecutedDate', futureDate);
+
+  const tasks = await this.agcDataBase.query(condition);
+  return tasks;
+}

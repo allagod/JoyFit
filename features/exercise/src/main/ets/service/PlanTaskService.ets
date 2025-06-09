@@ -207,3 +207,172 @@ export class PlanTaskService {
     return await this.agcDataBase.query(condition);
   }
 }
+
+
+
+/**
+ * 批量将指定任务列表标记为已完成状态
+ * @param taskIDs - 任务ID数组
+ * @returns 操作是否成功，全部任务更新成功返回 true，出现异常返回 false
+ */
+public async finishTasks(taskIDs: string[]): Promise<boolean> {
+  try {
+    for (const taskID of taskIDs) {
+      const query = new cloudDatabase.DatabaseQuery(PlanTask);
+      query.equalTo('TaskID', taskID);
+      const tasks = await this.agcDataBase.query(query);
+      const task = tasks.pop();
+      if (task) {
+        task.State = "Completed";
+        await this.agcDataBase.upsert(task);
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error(`Failed batch complete tasks: ${JSON.stringify(err)}`);
+    return false;
+  }
+}
+
+/**
+ * 批量将指定任务列表标记为已放弃状态
+ * @param taskIDs - 任务ID数组
+ * @returns 操作是否成功，全部任务更新成功返回 true，出现异常返回 false
+ */
+public async abandonTasks(taskIDs: string[]): Promise<boolean> {
+  try {
+    for (const taskID of taskIDs) {
+      const query = new cloudDatabase.DatabaseQuery(PlanTask);
+      query.equalTo('TaskID', taskID);
+      const tasks = await this.agcDataBase.query(query);
+      const task = tasks.pop();
+      if (task) {
+        task.State = "Abandoned";
+        await this.agcDataBase.upsert(task);
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error(`Failed batch abandon tasks: ${JSON.stringify(err)}`);
+    return false;
+  }
+}
+
+/**
+ * 根据计划ID查询对应的所有任务，可选择按状态过滤
+ * @param planID - 计划ID
+ * @param states - 状态字符串数组（可选），不传则查询所有状态
+ * @returns 满足条件的任务列表
+ */
+public async getTasksByPlanID(planID: string, states: string[] = []): Promise<PlanTask[]> {
+  const condition = new cloudDatabase.DatabaseQuery(PlanTask);
+  condition.equalTo('PlanID', planID);
+  if (states.length > 0) {
+    condition.in('State', states);
+  }
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 查询指定用户所有未完成任务（状态非已完成及已放弃）
+ * @param userID - 用户ID
+ * @returns 该用户所有处于待完成状态的任务列表
+ */
+public async getPendingTasks(userID: string): Promise<PlanTask[]> {
+  const condition = new cloudDatabase.DatabaseQuery(PlanTask);
+  condition.equalTo('UserID', userID);
+  condition.notEqualTo('State', 'Completed').and().notEqualTo('State', 'Abandoned');
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 根据用户ID和具体日期查询当天所有任务
+ * @param userID - 用户ID
+ * @param date - 指定查询的日期
+ * @returns 当天执行的任务列表
+ */
+public async getTasksByDate(userID: string, date: Date): Promise<PlanTask[]> {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+
+  const condition = new cloudDatabase.DatabaseQuery(PlanTask);
+  condition.equalTo('UserID', userID)
+           .and()
+           .greaterThanOrEqualTo('ExecutedDate', start)
+           .and()
+           .lessThan('ExecutedDate', end);
+
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 获取用户的训练记录，并附带对应的任务信息（若存在）
+ * @param userID - 用户ID
+ * @param limit - 返回记录条数限制，默认10条
+ * @param offset - 记录偏移量，用于分页，默认0
+ * @returns 数组，包含记录和对应任务对象
+ */
+public async getRecordsWithTasks(userID: string, limit: number = 10, offset: number = 0) {
+  const condition = new cloudDatabase.DatabaseQuery(WorkoutRecord);
+  condition.equalTo('UserID', userID);
+  condition.limit(limit).offset(offset);
+
+  const records = await this.agcDataBase.query(condition);
+  const result = [];
+
+  for (const record of records) {
+    if (record.TaskID) {
+      const taskQuery = new cloudDatabase.DatabaseQuery(PlanTask);
+      taskQuery.equalTo('TaskID', record.TaskID);
+      const tasks = await this.agcDataBase.query(taskQuery);
+      const task = tasks.pop();
+      result.push({ record, task });
+    } else {
+      result.push({ record, task: null });
+    }
+  }
+  return result;
+}
+
+/**
+ * 更新指定任务的备注信息
+ * @param taskID - 任务ID
+ * @param note - 新的备注内容
+ * @returns 更新是否成功，成功返回 true，否则 false
+ */
+public async updateTaskNote(taskID: string, note: string): Promise<boolean> {
+  try {
+    const query = new cloudDatabase.DatabaseQuery(PlanTask);
+    query.equalTo('TaskID', taskID);
+    const tasks = await this.agcDataBase.query(query);
+    const task = tasks.pop();
+    if (task) {
+      task.Note = note;
+      await this.agcDataBase.upsert(task);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error(`Failed to update task note: ${JSON.stringify(err)}`);
+    return false;
+  }
+}
+
+/**
+ * 统计用户不同状态的任务数量
+ * @param userID - 用户ID
+ * @returns 一个对象，键为任务状态，值为对应状态任务数量
+ */
+public async getTaskCountByState(userID: string): Promise<Record<string, number>> {
+  const states = ['Pending', 'Completed', 'Abandoned', 'InProgress'];
+  const counts: Record<string, number> = {};
+
+  for (const state of states) {
+    const condition = new cloudDatabase.DatabaseQuery(PlanTask);
+    condition.equalTo('UserID', userID).and().equalTo('State', state);
+    const tasks = await this.agcDataBase.query(condition);
+    counts[state] = tasks.length;
+  }
+
+  return counts;
+}
