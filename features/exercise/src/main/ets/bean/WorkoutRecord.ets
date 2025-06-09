@@ -1,18 +1,18 @@
 import { cloudDatabase } from '@kit.CloudFoundationKit';
 
-// 创建一个WorkoutRecord的类继承cloudDatabase.DatabaseObject
+// WorkoutRecord 类，继承 cloudDatabase.DatabaseObject
 class WorkoutRecord extends cloudDatabase.DatabaseObject {
-  public naturalbase_ClassName(): string {
+  // 返回类名，供 Cloud DB 使用
+  public override naturalbase_ClassName(): string {
     return 'WorkoutRecord';
   }
 
-  public RecordID: string | undefined;  // Integer类型
-  public Image: string | undefined;  // String类型
-  public Feeling: string | undefined;  // Text类型
-  public RecordDate: Date | undefined;  // Date类型
-  public Calories: number | undefined;  // Double类型
-  public PlanID: number | undefined;  // Integer类型
-
+  public RecordID?: number;        // Integer 类型，编号
+  public Image?: string;           // String 类型，图片路径
+  public Feeling?: string;         // Text 类型，用户感受
+  public RecordDate?: Date;        // Date 类型，记录时间
+  public Calories?: number;        // Double 类型，消耗卡路里
+  public PlanID?: number;          // Integer 类型，计划 ID
 }
 
 export { WorkoutRecord };
