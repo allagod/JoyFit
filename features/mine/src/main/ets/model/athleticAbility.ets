@@ -1,52 +1,78 @@
-export class athleticAbility {
-  // 属性字段
-  private _runningDistance: number;  // 跑步距离 (以公里为单位)
-  private _pushUpNums: number;       // 俯卧撑数量
-  private _squatNums: number;        // 深蹲次数
-  private _crunchNums: number;       // 仰卧起坐次数
+export class AthleticAbility {
+  constructor(
+    private _runningDistance: number = 0,
+    private _pushUpNums: number = 0,
+    private _squatNums: number = 0,
+    private _crunchNums: number = 0
+  ) {}
 
-  private constructor(runningDistance: number, pushUpNums: number, squatNums: number, crunchNums: number) {
-    this._runningDistance = runningDistance;
-    this._pushUpNums = pushUpNums;
-    this._squatNums = squatNums;
-    this._crunchNums = crunchNums;
+  // 创建工厂方法
+  public static create(data: {
+    runningDistance?: number;
+    pushUpNums?: number;
+    squatNums?: number;
+    crunchNums?: number;
+  }): AthleticAbility {
+    return new AthleticAbility(
+      data.runningDistance ?? 0,
+      data.pushUpNums ?? 0,
+      data.squatNums ?? 0,
+      data.crunchNums ?? 0
+    );
   }
 
-  get runningDistance(): number{
+  // 跑步距离
+  public get runningDistance(): number {
     return this._runningDistance;
   }
-  set runningDistance(value: number){
-    //可以添加验证逻辑
-    this._runningDistance =value;
+
+  public set runningDistance(value: number) {
+    this._runningDistance = this.validate(value, 'RunningDistance');
   }
 
-  get pushUpNums(): number{
+  // 俯卧撑数量
+  public get pushUpNums(): number {
     return this._pushUpNums;
   }
-  set pushUpNums(value: number){
-    //可以添加验证逻辑
-    this._pushUpNums =value;
+
+  public set pushUpNums(value: number) {
+    this._pushUpNums = this.validate(value, 'PushUpNums');
   }
 
-  get squatNums(): number{
+  // 深蹲数量
+  public get squatNums(): number {
     return this._squatNums;
   }
-  set squatNums(value: number){
-    //可以添加验证逻辑
-    this._squatNums =value;
+
+  public set squatNums(value: number) {
+    this._squatNums = this.validate(value, 'SquatNums');
   }
 
-  get crunchNums(): number{
+  // 仰卧起坐数量
+  public get crunchNums(): number {
     return this._crunchNums;
   }
-  set crunchNums(value: number){
-    //可以添加验证逻辑
-    this._crunchNums =value;
+
+  public set crunchNums(value: number) {
+    this._crunchNums = this.validate(value, 'CrunchNums');
   }
 
-  static create(runningDistance: number, pushUpNums: number, squatNums: number, crunchNums: number):athleticAbility{
-    return new athleticAbility(runningDistance, pushUpNums, squatNums, crunchNums);
+  // 校验函数
+  private validate(value: number, field: string): number {
+    if (value < 0 || !Number.isFinite(value)) {
+      console.warn(`[AthleticAbility] Invalid value for ${field}:`, value);
+      return 0;
+    }
+    return value;
   }
 
-
+  // 序列化成 JSON
+  public toJSON() {
+    return {
+      runningDistance: this._runningDistance,
+      pushUpNums: this._pushUpNums,
+      squatNums: this._squatNums,
+      crunchNums: this._crunchNums
+    };
+  }
 }

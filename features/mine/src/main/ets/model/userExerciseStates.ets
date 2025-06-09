@@ -1,69 +1,78 @@
-export class userExerciseStates {
-  private _totalSteps:number;
-  private _totalExerciseTime:number;
-  private _totalCalorisesBurned:number;
-  private _timeStamp:Date;
+export class UserExerciseStates {
+  private _totalSteps: number;
+  private _totalExerciseTime: number;
+  private _totalCaloriesBurned: number;
+  private _timeStamp: Date;
 
-  private constructor(totalSteps:number,totalExerciseTime:number,totalCalorisesBurned:number,timeStamp:Date) {
-    this._totalSteps = totalSteps;
-    this._totalExerciseTime =totalExerciseTime;
-    this._totalCalorisesBurned =totalCalorisesBurned;
-    this._timeStamp= timeStamp;
+  private constructor(
+    totalSteps: number,
+    totalExerciseTime: number,
+    totalCaloriesBurned: number,
+    timeStamp: Date
+  ) {
+    this._totalSteps = Math.max(0, totalSteps);
+    this._totalExerciseTime = Math.max(0, totalExerciseTime);
+    this._totalCaloriesBurned = Math.max(0, totalCaloriesBurned);
+    this.timeStamp = timeStamp; // use setter for validation
   }
 
-  get totalSteps():number{
+  // 工厂方法
+  public static create(data: {
+    totalSteps: number;
+    totalExerciseTime: number;
+    totalCaloriesBurned: number;
+    timeStamp: Date;
+  }): UserExerciseStates {
+    return new UserExerciseStates(
+      data.totalSteps,
+      data.totalExerciseTime,
+      data.totalCaloriesBurned,
+      data.timeStamp
+    );
+  }
+
+  public get totalSteps(): number {
     return this._totalSteps;
   }
 
-  set totalSteps(value:number){
-    if(value>=0) {
-      this._totalSteps = value;
-    }
-    else{
-      this._totalSteps =0;
-    }
+  public set totalSteps(value: number) {
+    this._totalSteps = Math.max(0, value);
   }
 
-  get totalExerciseTime():number{
+  public get totalExerciseTime(): number {
     return this._totalExerciseTime;
   }
 
-  set totalExerciseTime(value:number){
-    if(value>=0) {
-      this._totalExerciseTime = value;
-    }
-    else{
-      this._totalExerciseTime =0;
-    }
+  public set totalExerciseTime(value: number) {
+    this._totalExerciseTime = Math.max(0, value);
   }
 
-  get totalCalorisesBurned():number{
-    return this._totalCalorisesBurned;
+  public get totalCaloriesBurned(): number {
+    return this._totalCaloriesBurned;
   }
 
-  set totalCalorisesBurned(value:number){
-    if(value>=0) {
-      this._totalCalorisesBurned = value;
-    }
-    else{
-      this._totalCalorisesBurned =0;
-    }
+  public set totalCaloriesBurned(value: number) {
+    this._totalCaloriesBurned = Math.max(0, value);
   }
 
-  get timeStamp():Date{
+  public get timeStamp(): Date {
     return this._timeStamp;
   }
 
-  set timeStamp(value:Date){
-    //检查是否为有效日期
-    if (isNaN(value.getTime())) {
+  public set timeStamp(value: Date) {
+    if (!(value instanceof Date) || isNaN(value.getTime())) {
       throw new Error("Invalid date provided to timeStamp");
     }
     this._timeStamp = value;
   }
 
-  static create(totalSteps:number,totalExerciseTime:number,totalCalorisesBurned:number,timeStamp:Date):userExerciseStates{
-    return new userExerciseStates(totalSteps,totalExerciseTime,totalCalorisesBurned,timeStamp );
+  // 用于序列化输出
+  public toJSON() {
+    return {
+      totalSteps: this._totalSteps,
+      totalExerciseTime: this._totalExerciseTime,
+      totalCaloriesBurned: this._totalCaloriesBurned,
+      timeStamp: this._timeStamp.toISOString(),
+    };
   }
-
 }

@@ -1,62 +1,82 @@
+export class Achievement {
+  constructor(
+    private _achievementID: string,
+    private _medalName: string,
+    private _achieveTime: Date,
+    private _medalImage: string,
+    private _description: string
+  ) {}
 
-export class achievement {
-  private _achievementID: string;
-  private _medalName: string;
-  private _achieveTime: Date;
-  private _medalImage: string;
-  private _description: string;
-
-  constructor(achievementID: string, medalName: string, achieveTime: Date, medalImage: string, description: string) {
-    this._achievementID = achievementID;
-    this._medalName = medalName;
-    this._achieveTime = achieveTime;
-    this._medalImage = medalImage;
-    this._description = description;
+  // 工厂方法，支持对象式传参
+  public static create(data: {
+    achievementID: string;
+    medalName: string;
+    achieveTime: Date;
+    medalImage: string;
+    description: string;
+  }): Achievement {
+    return new Achievement(
+      data.achievementID,
+      data.medalName,
+      data.achieveTime,
+      data.medalImage,
+      data.description
+    );
   }
 
-   getAchievementID(): string {
+  // 成就 ID
+  public get achievementID(): string {
     return this._achievementID;
   }
 
-  setAchievementID(id: string): void {
-    this._achievementID = id;
+  public set achievementID(value: string) {
+    this._achievementID = value;
   }
 
-  getMedalName(): string {
+  // 勋章名称
+  public get medalName(): string {
     return this._medalName;
   }
 
-  setMedalName(name: string): void {
-    this._medalName = name;
+  public set medalName(value: string) {
+    this._medalName = value;
   }
 
-  getAchieveTime(): Date {
+  // 成就时间
+  public get achieveTime(): Date {
     return this._achieveTime;
   }
 
-  setAchieveTime(time: Date): void {
-    this._achieveTime = time;
+  public set achieveTime(value: Date) {
+    this._achieveTime = value;
   }
 
-  getMedalImage(): string {
+  // 勋章图片路径
+  public get medalImage(): string {
     return this._medalImage;
   }
 
-  setMedalImage(image: string): void {
-    this._medalImage = image;
+  public set medalImage(value: string) {
+    this._medalImage = value;
   }
 
-  getDescription(): string {
+  // 成就描述
+  public get description(): string {
     return this._description;
   }
 
-  setDescription(desc: string): void {
-    this._description = desc;
+  public set description(value: string) {
+    this._description = value;
   }
 
-  static create(achievementID:string,medalName:string,achieveTime:Date,medalImage:string,description:string):achievement{
-    return new achievement(achievementID, medalName, achieveTime, medalImage, description);
+  // 将对象序列化为 JSON（用于网络传输或日志）
+  public toJSON() {
+    return {
+      achievementID: this._achievementID,
+      medalName: this._medalName,
+      achieveTime: this._achieveTime.toISOString(),
+      medalImage: this._medalImage,
+      description: this._description
+    };
   }
-
-
 }
