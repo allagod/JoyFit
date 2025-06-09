@@ -74,6 +74,17 @@ export default struct MinePage {
                 Text('21.3')
                   .maxFontSize("80sp")
                   .minFontSize("60.0vp")
+                  .height('30%')
+                  .textAlign(TextAlign.Center)
+                  .margin({ top: '22.2%' })
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .maxLines(1)
+              }.width('100%').height('100%')
+                          Gauge({ value: 21, min: 10, max: 32 }) {
+              Column() {
+                Text('21.3')
+                  .maxFontSize("80sp")
+                  .minFontSize("60.0vp")
                   .fontWeight(FontWeight.Medium)
                   .fontColor("#ff182431")
                   .width('40%')
@@ -94,9 +105,11 @@ export default struct MinePage {
               { color: "#64bb5c", offset: 0.5 },
               { color: "#f7ce00", offset: 0.8 },
               { color: "#e84026", offset: 1 }]))
-            .width('100%')
-            .height('100%')
-            .strokeWidth(18)
+            .width('70%')
+            .height('70%')
+            .strokeWidth(19)
+            .trackShadow({ radius: 7, offsetX: 7, offsetY: 7 })
+            .padding(18)
             .trackShadow({ radius: 7, offsetX: 7, offsetY: 7 })
             .padding(18)
           }.width('45%')
