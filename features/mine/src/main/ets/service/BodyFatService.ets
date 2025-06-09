@@ -68,3 +68,107 @@ export class BodyFatService{
     }
   }
 }
+
+
+/**
+ * 判断用户今天是否已提交体脂记录（防止重复记录）
+ */
+public async isTodayRecorded(uid: string): Promise<boolean> {
+  const today = new Date();
+  const todayInt = DateConverToNum.convertDateToInteger(today);
+
+  const condition = new cloudDatabase.DatabaseQuery(BodyFatData)
+    .equalTo('UserID', uid)
+    .and()
+    .equalTo('BodyFatRecordTime', todayInt);
+
+  const result = await this.agcDataBase.query(condition);
+  return result.length > 0;
+}
+
+/**
+ * 获取最近 N 条体脂记录（按时间倒序）
+ */
+public async getRecentBodyFatRecords(uid: string, limit: number = 5) {
+  const condition = new cloudDatabase.DatabaseQuery(BodyFatData)
+    .equalTo('UserID', uid)
+    .orderByDesc('BodyFatRecordTime')
+    .limit(limit);
+
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 获取某时间段内的体脂数据
+ */
+public async getBodyFatByDateRange(uid: string, start: Date, end: Date) {
+  const startInt = DateConverToNum.convertDateToInteger(start);
+  const endInt = DateConverToNum.convertDateToInteger(end);
+
+  const condition = new cloudDatabase.DatabaseQuery(BodyFatData)
+    .equalTo('UserID', uid)
+    .and()
+    .greaterThanOrEqualTo('BodyFatRecordTime', startInt)
+    .and()
+    .lessThanOrEqualTo('BodyFatRecordTime', endInt);
+
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 获取体脂率的最大、最小、平均值
+ */
+public async getBodyFatStats(uid: string): Promise<{ max: number; min: number; avg: number } | null> {
+  const records = await this.getBodyFatRateHistory(uid);
+  if (!records || records.length === 0) return null;
+
+  const rates = records.map((r: any) => r.BodyFatRate);
+  const max = Math.max(...rates);
+  const min = Math.min(...rates);
+  const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
+
+  return { max, min, avg: parseFloat(avg.toFixed(2)) };
+}
+
+/**
+ * 获取体脂率变化趋势（最近一次 vs 最早一次）
+ */
+public async getBodyFatTrend(uid: string): Promise<number | null> {
+  const records = await this.getBodyFatRateHistory(uid);
+  if (!records || records.length < 2) return null;
+
+  const sorted = records.sort((a: any, b: any) => b.BodyFatRecordTime - a.BodyFatRecordTime);
+  const latest = sorted[0].BodyFatRate;
+  const oldest = sorted[sorted.length - 1].BodyFatRate;
+
+  return parseFloat((latest - oldest).toFixed(2));
+}
+
+/**
+ * 分页获取体脂记录
+ */
+public async getBodyFatPaginated(uid: string, page: number = 1, pageSize: number = 10) {
+  const offset = (page - 1) * pageSize;
+  const condition = new cloudDatabase.DatabaseQuery(BodyFatData)
+    .equalTo('UserID', uid)
+    .orderByDesc('BodyFatRecordTime')
+    .limit(pageSize)
+    .offset(offset);
+
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 获取每天的体脂记录数量（用于图表可视化）
+ */
+public async groupBodyFatByDate(uid: string): Promise<Record<string, number>> {
+  const records = await this.getBodyFatRateHistory(uid);
+  const grouped: Record<string, number> = {};
+
+  records.forEach((record: any) => {
+    const dateKey = record.BodyFatRecordTime.toString(); // 假设整数格式如 20250609
+    grouped[dateKey] = (grouped[dateKey] || 0) + 1;
+  });
+
+  return grouped;
+}

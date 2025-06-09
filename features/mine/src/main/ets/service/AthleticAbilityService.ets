@@ -78,3 +78,100 @@ export class AthleticAbilityService{
     }
   }
 }
+
+
+/**
+ * 获取最近一次和最早一次记录之间的变化情况（增减趋势）
+ */
+public async getAbilityChangeTrend(userId: string) {
+  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
+    .equalTo('UserID', userId)
+    .orderByDesc('LastUpdated');
+
+  const records = await this.agcDataBase.query(condition);
+  if (records.length < 2) return null;
+
+  const latest = records[0];
+  const earliest = records[records.length - 1];
+
+  return {
+    PushUpChange: latest.PushUpNums - earliest.PushUpNums,
+    SquatChange: latest.SquatNums - earliest.SquatNums,
+    CrunchChange: latest.CrunchNums - earliest.CrunchNums,
+    RunningChange: latest.RunningDistance - earliest.RunningDistance
+  };
+}
+
+/**
+ * 获取用户过去 N 天的运动能力变化记录（按时间倒序）
+ */
+public async getRecentAbilityHistory(userId: string, days: number = 7) {
+  const today = new Date();
+  const cutoff = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+
+  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
+    .equalTo('UserID', userId)
+    .and()
+    .greaterThanOrEqualTo('LastUpdated', DateConverToNum.convertDateToInteger(cutoff))
+    .orderByDesc('LastUpdated');
+
+  return await this.agcDataBase.query(condition);
+}
+
+/**
+ * 判断今日是否已经提交了能力记录（防止重复提交）
+ */
+public async isTodayRecordExists(userId: string): Promise<boolean> {
+  const todayInt = DateConverToNum.convertDateToInteger(new Date());
+
+  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
+    .equalTo('UserID', userId)
+    .and()
+    .equalTo('LastUpdated', todayInt);
+
+  const result = await this.agcDataBase.query(condition);
+  return result.length > 0;
+}
+
+/**
+ * 获取某一项（如俯卧撑）能力的最大记录值
+ */
+public async getMaxAbilityValue(userId: string, field: keyof AthleticAbility): Promise<number | null> {
+  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
+    .equalTo('UserID', userId)
+    .orderByDesc(field)
+    .limit(1);
+
+  const result = await this.agcDataBase.query(condition);
+  return result.length > 0 ? result[0][field] : null;
+}
+
+/**
+ * 统计某用户提交的运动能力记录总数
+ */
+public async getTotalRecordCount(userId: string): Promise<number> {
+  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
+    .equalTo('UserID', userId);
+
+  const result = await this.agcDataBase.query(condition);
+  return result.length;
+}
+
+/**
+ * 获取运动能力历史记录中每日记录数量（可用于图表分析）
+ */
+public async getDailyRecordDistribution(userId: string): Promise<Record<string, number>> {
+  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
+    .equalTo('UserID', userId)
+    .orderByDesc('LastUpdated');
+
+  const result = await this.agcDataBase.query(condition);
+  const distribution: Record<string, number> = {};
+
+  result.forEach(record => {
+    const dateStr = record.LastUpdated.toString(); // 假设为整数格式日期
+    distribution[dateStr] = (distribution[dateStr] || 0) + 1;
+  });
+
+  return distribution;
+}
