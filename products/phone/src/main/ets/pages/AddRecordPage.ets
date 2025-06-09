@@ -1,70 +1,47 @@
-import { router } from '@kit.ArkUI'
+import { router } from '@kit.ArkUI';
 
 @Entry
 @ComponentV2
 struct AddRecordPage {
-  @Local txt: string = ''
-  @Local title: string = ''
+  @Local txt: string = '';
+  @Local title: string = '';
 
   build() {
     Column() {
+      // 顶部导航栏
       Row() {
         Image($r('app.media.ic_chevron_left'))
           .height(30)
-          .onClick(() => {
-            router.back()
-          })
+          .onClick(() => router.back());
+
         Text('添加记录')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium);
+
         Text('完成')
-          .backgroundColor("#0bbe86")
+          .backgroundColor('#0bbe86')
           .fontColor(Color.White)
-          .padding({top: 5, bottom: 5, left: 10, right: 10})
+          .padding({ top: 5, bottom: 5, left: 10, right: 10 })
           .borderRadius(10)
-          .onClick(() => {
-            router.back()
-          })
+          .onClick(() => router.back());
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
-      .padding({left: 30, right: 30, bottom: 15})
-      .backgroundColor(Color.White)
+      .padding({ left: 30, right: 30, bottom: 15 })
+      .backgroundColor(Color.White);
 
-
+      // 标题输入框
       TextInput({
         placeholder: '请输入该记录标题',
         text: $$this.title
       })
-        .margin({top: 30, left: 20, right: 20})
-        .backgroundColor(Color.White)
+        .margin({ top: 30, left: 20, right: 20 })
+        .backgroundColor(Color.White);
+
+      // 内容输入框
       TextArea({
         placeholder: '记录此刻的感受',
         text: $$this.txt
       })
-        .backgroundColor(Color.White)
-        .margin({top: 10, left: 20, right: 20})
-        .height(200)
-
-      Row() {
-        Row() {
-          Text('+')
-            .fontSize(56)
-            .fontWeight(FontWeight.Lighter)
-        }
-        .margin({top: 10, left: 20, right: 20})
-        .backgroundColor(Color.White)
-        .width(80)
-        .height(80)
-        .justifyContent(FlexAlign.Center)
-        .borderRadius(20)
-        .borderWidth(1)
-        .borderColor('#95000000')
-        .borderStyle(BorderStyle.Dashed)
-      }
-      .width('100%')
-
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor("#ffeeeeee")
-  }
-}
+        .margin({ top: 10, left: 20, right: 20 })
+        .backgroundColor(Color.Wh
