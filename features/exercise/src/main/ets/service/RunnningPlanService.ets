@@ -23,14 +23,16 @@ export class RunningPlanService extends ExercisePlanService{
     return  RunningPlanService.instance;
   }
 
+  // 创建 RunningPlan 的构建器
   public createPlanBuilder(): runningPlanBuilder {
     return new runningPlanBuilder();
   }
 
-  public async getTodayTasks(userID:string): Promise<RunningPlan[]>{
+  // 获取用户今天的待执行跑步任务对应的计划信息
+  public async getTodayTasks(userID:string): Promise<RunningPlan[]> {
     let currentTime = new Date();
     let condition = new cloudDatabase.DatabaseQuery(PlanTask);
-    condition.equalTo('UserID',userID).and().equalTo('ExecutedDate',currentTime).and().equalTo('TaskType','running').and().equalTo('State','Pending'); //这个判断条件可能要改
+    condition.equalTo('UserID',userID).and().equalTo('ExecutedDate',currentTime).and().equalTo('TaskType','running').and().equalTo('State','Pending');
     const TaskArray: PlanTask[]= await this.agcDataBase.query(condition);
     let result: RunningPlan[]=[];
     for(let task of TaskArray) {
@@ -44,52 +46,49 @@ export class RunningPlanService extends ExercisePlanService{
     return result;
   }
 
-  private runningPlanToBean(plan: runningPlan,id:string){
-    let planContent =new RunningPlan();
+  // 将 runningPlan 对象转换为 RunningPlan 数据表实体
+  private runningPlanToBean(plan: runningPlan,id:string) {
+    let planContent = new RunningPlan();
     planContent.PlanID = plan.PlanID;
     planContent.UserID = id;
-    planContent.PlanName =plan.PlanName;
-    planContent.CoverPicture =plan.CoverPicture;
-    planContent.PlanState =plan.PlanState;
-    planContent.EndDate =plan.EndDate;
-    planContent.DayOfWeek =plan.DayOfWeek;
-    planContent.StartDate =plan.StartDate;
-    planContent.GoalOfTotalTime= plan.GoalOfTotalTime;
-    planContent.GoalOfTotalMiles =plan.GoalOfTotalMiles;
+    planContent.PlanName = plan.PlanName;
+    planContent.CoverPicture = plan.CoverPicture;
+    planContent.PlanState = plan.PlanState;
+    planContent.EndDate = plan.EndDate;
+    planContent.DayOfWeek = plan.DayOfWeek;
+    planContent.StartDate = plan.StartDate;
+    planContent.GoalOfTotalTime = plan.GoalOfTotalTime;
+    planContent.GoalOfTotalMiles = plan.GoalOfTotalMiles;
     planContent.GoalOfSpeed = plan.GoalOfSpeed;
     return planContent;
   }
 
+  // 删除计划（目前未实现）
   public async deletePlan(planID: string) {
-    // let condition = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-    // condition.equalTo('PlanID',planID);
-    // const Array: WorkoutPlan[]= await this.agcDataBase.query(condition);
-    // let deleteNum = this.agcDataBase.delete(Array);
-    // this.deleteTask(planID);
-    // this.deletePlanAction(planID);
+    // 方法尚未实现
   }
 
-  public async uploadPlan(plan:runningPlan,userID:string): Promise<boolean> {
-    const planContent =this.runningPlanToBean(plan,userID);
-    let targetDates =this.getExecutionDates(plan.StartDate,plan.EndDate,plan.DayOfWeek);
-    let taskArr: PlanTask[] =[];
+  // 上传新的跑步计划及其对应的任务列表
+  public async uploadPlan(plan: runningPlan, userID: string): Promise<boolean> {
+    const planContent = this.runningPlanToBean(plan, userID);
+    let targetDates = this.getExecutionDates(plan.StartDate, plan.EndDate, plan.DayOfWeek);
+    let taskArr: PlanTask[] = [];
     for(let date of targetDates){
       if(plan.PlanID != undefined)
-        taskArr.push(this.taskToBean(plan.PlanID,userID,date))
+        taskArr.push(this.taskToBean(plan.PlanID, userID, date))
     }
     try {
-      //向RunningPlan表中插入记录
       await this.agcDataBase?.upsert(planContent);
-      //插入待办任务
-      await this.agcDataBase?.upsert(planContent);
+      await this.agcDataBase?.upsert(planContent); // 注意可能存在重复插入
       return true;
     } catch (err) {
       return false;
     }
   }
 
+  // 更新已有跑步计划
   public async updatePlan(plan: runningPlan, userID: string): Promise<boolean> {
-    const planContent =this.runningPlanToBean(plan,userID);
+    const planContent = this.runningPlanToBean(plan, userID);
     try {
       await this.agcDataBase?.upsert(planContent);
       return true;
@@ -98,6 +97,7 @@ export class RunningPlanService extends ExercisePlanService{
     }
   }
 
+  // 获取未开始的跑步计划
   public async getNotStartedPlan(userID:string) {
     let condition = new cloudDatabase.DatabaseQuery(RunningPlan);
     condition.equalTo('UserID',userID).and().equalTo('PlanState','NotStarted');
@@ -105,6 +105,7 @@ export class RunningPlanService extends ExercisePlanService{
     return planArray;
   }
 
+  // 获取已完成的跑步计划
   public async getCompletedPlan(userID:string) {
     let condition = new cloudDatabase.DatabaseQuery(RunningPlan);
     condition.equalTo('UserID',userID).and().equalTo('PlanState','Completed');
@@ -112,6 +113,7 @@ export class RunningPlanService extends ExercisePlanService{
     return planArray;
   }
 
+  // 获取正在进行中的跑步计划
   public async getInProgressPlan(userID:string) {
     let condition = new cloudDatabase.DatabaseQuery(RunningPlan);
     condition.equalTo('UserID',userID).and().equalTo('PlanState','InProgress');
@@ -119,6 +121,7 @@ export class RunningPlanService extends ExercisePlanService{
     return planArray;
   }
 
+  // 获取已放弃的跑步计划
   public async getAbandonedPlan(userID:string) {
     let condition = new cloudDatabase.DatabaseQuery(RunningPlan);
     condition.equalTo('UserID',userID).and().equalTo('PlanState','Abandoned');
@@ -126,6 +129,7 @@ export class RunningPlanService extends ExercisePlanService{
     return planArray;
   }
 
+  // 将正在进行的计划标记为放弃
   public async abandonInProgressPlan(targetPlan:RunningPlan){
     try{
       targetPlan.PlanState = "Abandoned";
@@ -139,6 +143,7 @@ export class RunningPlanService extends ExercisePlanService{
     }
   }
 
+  // 获取指定计划的所有用户感受记录
   public async getFeelingsByPlan(userID: string, planID: string) {
     let condition = new cloudDatabase.DatabaseQuery(RunningRecord);
     condition.equalTo('UserID',userID).and().equalTo('PlanID',planID);
@@ -146,6 +151,7 @@ export class RunningPlanService extends ExercisePlanService{
     return planArray;
   }
 
+  // 获取与计划关联的所有 PlanTask 记录
   public async getRecords(userID: string, planID: string) {
     let condition = new cloudDatabase.DatabaseQuery(PlanTask);
     condition.equalTo('UserID',userID).and().equalTo('PlanID',planID).and().equalTo('TaskType','running');

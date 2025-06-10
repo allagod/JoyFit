@@ -335,44 +335,62 @@ public async getRecordsWithTasks(userID: string, limit: number = 10, offset: num
 }
 
 /**
- * 更新指定任务的备注信息
- * @param taskID - 任务ID
- * @param note - 新的备注内容
- * @returns 更新是否成功，成功返回 true，否则 false
+ * 根据任务 ID 更新任务备注
+ * @param taskID - 待更新的任务 ID
+ * @param note - 备注内容
+ * @returns 成功返回 true，失败返回 false
  */
 public async updateTaskNote(taskID: string, note: string): Promise<boolean> {
+  if (!taskID || typeof note !== 'string') {
+    console.warn('Invalid parameters for updateTaskNote');
+    return false;
+  }
+
   try {
     const query = new cloudDatabase.DatabaseQuery(PlanTask);
     query.equalTo('TaskID', taskID);
-    const tasks = await this.agcDataBase.query(query);
-    const task = tasks.pop();
-    if (task) {
-      task.Note = note;
-      await this.agcDataBase.upsert(task);
-      return true;
+
+    const [task] = await this.agcDataBase.query(query);
+    if (!task) {
+      console.warn(`No task found with TaskID: ${taskID}`);
+      return false;
     }
-    return false;
-  } catch (err) {
-    console.error(`Failed to update task note: ${JSON.stringify(err)}`);
+
+    task.Note = note;
+    await this.agcDataBase.upsert(task);
+    return true;
+  } catch (error) {
+    console.error(`Error updating task note for TaskID ${taskID}:`, error);
     return false;
   }
 }
 
 /**
- * 统计用户不同状态的任务数量
- * @param userID - 用户ID
- * @returns 一个对象，键为任务状态，值为对应状态任务数量
+ * 获取指定用户的任务状态分布统计
+ * @param userID - 用户 ID
+ * @returns 一个对象，键为任务状态，值为对应状态的数量
  */
 public async getTaskCountByState(userID: string): Promise<Record<string, number>> {
-  const states = ['Pending', 'Completed', 'Abandoned', 'InProgress'];
-  const counts: Record<string, number> = {};
-
-  for (const state of states) {
-    const condition = new cloudDatabase.DatabaseQuery(PlanTask);
-    condition.equalTo('UserID', userID).and().equalTo('State', state);
-    const tasks = await this.agcDataBase.query(condition);
-    counts[state] = tasks.length;
+  if (!userID) {
+    console.warn('UserID is required to get task count by state');
+    return {};
   }
 
-  return counts;
+  const stateList = ['Pending', 'Completed', 'Abandoned', 'InProgress'];
+  const result: Record<string, number> = {};
+
+  try {
+    for (const state of stateList) {
+      const query = new cloudDatabase.DatabaseQuery(PlanTask);
+      query.equalTo('UserID', userID).and().equalTo('State', state);
+
+      const tasks = await this.agcDataBase.query(query);
+      result[state] = tasks.length;
+    }
+  } catch (error) {
+    console.error(`Error fetching task count by state for user ${userID}:`, error);
+  }
+
+  return result;
 }
+

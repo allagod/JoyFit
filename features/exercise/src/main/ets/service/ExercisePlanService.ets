@@ -184,48 +184,94 @@ public async setReminderForPlan(planID: string, reminderTime: Date): Promise<boo
   return true;
 }
 
-// 获取用户未来几天内即将开始的跑步和力量训练计划
+// 获取未来指定天数内的跑步和训练计划
 public async getUpcomingPlans(userID: string, daysAhead: number = 3): Promise<exercisePlan[]> {
-  const now = new Date();
-  const future = new Date();
+  const [now, future] = [new Date(), new Date()];
   future.setDate(now.getDate() + daysAhead);
 
-  const query = new cloudDatabase.DatabaseQuery(RunningPlan);
-  query.equalTo('UserID', userID)
-    .and()
-    .greaterThanOrEqualTo('StartDate', now)
-    .and()
-    .lessThanOrEqualTo('StartDate', future);
-  const running = await this.agcDataBase.query(query);
+  const dateRangeFilter = (query: cloudDatabase.DatabaseQuery<any>) =>
+    query.equalTo('UserID', userID)
+         .and()
+         .greaterThanOrEqualTo('StartDate', now)
+         .and()
+         .lessThanOrEqualTo('StartDate', future);
 
-  const workoutQuery = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-  workoutQuery.equalTo('UserID', userID)
-    .and()
-    .greaterThanOrEqualTo('StartDate', now)
-    .and()
-    .lessThanOrEqualTo('StartDate', future);
-  const workout = await this.agcDataBase.query(workoutQuery);
+  const runningPlans = await this.agcDataBase.query(dateRangeFilter(new cloudDatabase.DatabaseQuery(RunningPlan)));
+  const workoutPlans = await this.agcDataBase.query(dateRangeFilter(new cloudDatabase.DatabaseQuery(WorkoutPlan)));
 
-  return [...running, ...workout];
+  return [...runningPlans, ...workoutPlans];
 }
 
-// 根据计划ID和类型获取对应的训练记录
-public async getRecordsByPlan(planID: string, type: 'running' | 'workout'): Promise<RunningRecord[] | WorkoutRecord[]> {
-  const recordClass = type === 'running' ? RunningRecord : WorkoutRecord;
-  const query = new cloudDatabase.DatabaseQuery(recordClass);
-  query.equalTo('PlanID', planID);
+// 根据计划类型（running/workout）和计划ID获取对应的记录
+public async getRecordsByPlan(planID: string, type: 'running' | 'workout'): Promise<Array<RunningRecord | WorkoutRecord>> {
+  const RecordModel = type === 'running' ? RunningRecord : WorkoutRecord;
+  const query = new cloudDatabase.DatabaseQuery(RecordModel).equalTo('PlanID', planID);
   return await this.agcDataBase.query(query);
 }
 
-// 统计用户当前进行中的跑步和力量训练计划数量
+// 统计进行中的跑步和训练计划总数
 public async countInProgressPlans(userID: string): Promise<number> {
-  const runningQuery = new cloudDatabase.DatabaseQuery(RunningPlan);
-  runningQuery.equalTo('UserID', userID).and().equalTo('Status', 'inProgress');
-  const runningPlans = await this.agcDataBase.query(runningQuery);
+  const countPlans = async (model: any): Promise<number> => {
+    const query = new cloudDatabase.DatabaseQuery(model)
+      .equalTo('UserID', userID)
+      .and()
+      .equalTo('Status', 'inProgress');
+    const results = await this.agcDataBase.query(query);
+    return results.length;
+  };
 
-  const workoutQuery = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-  workoutQuery.equalTo('UserID', userID).and().equalTo('Status', 'inProgress');
-  const workoutPlans = await this.agcDataBase.query(workoutQuery);
+  const [runningCount, workoutCount] = await Promise.all([
+    countPlans(RunningPlan),
+    countPlans(WorkoutPlan)
+  ]);
 
-  return runningPlans.length + workoutPlans.length;
+  return runningCount + workoutCount;
+}
+
+// 统计系统中所有状态为“已完成”的跑步计划数量
+public async countCompletedRunningPlan(): Promise<number> {
+  const query = new cloudDatabase.DatabaseQuery(RunningPlan);
+  query.equalTo('Status', 'Completed');
+  const results = await this.agcDataBase.query(query);
+  return results.length;
+}
+
+// 统计系统中所有状态为“已完成”的力量训练计划数量
+public async countCompletedWorkoutPlan(): Promise<number> {
+  const query = new cloudDatabase.DatabaseQuery(WorkoutPlan);
+  query.equalTo('Status', 'Completed');
+  const results = await this.agcDataBase.query(query);
+  return results.length;
+}
+
+// 计算指定用户在所有运动记录中累计消耗的总卡路里（跑步 + 力量训练）
+public async getTotalCaloriesBurned(userID: string): Promise<number> {
+  const recordTypes = [RunningRecord, WorkoutRecord];
+  let totalCalories = 0;
+  for (const type of recordTypes) {
+    const query = new cloudDatabase.DatabaseQuery(type);
+    query.equalTo('UserID', userID);
+    const records = await this.agcDataBase.query(query);
+    for (const record of records) {
+      totalCalories += record.CaloriesBurned || 0;
+    }
+  }
+  return totalCalories;
+}
+
+// 获取指定用户所有运动记录中的最大单次运动距离
+public async getMaxDistanceRecord(userID: string): Promise<number> {
+  const models = [RunningRecord, WorkoutRecord];
+  let maxDistance = 0;
+  for (const model of models) {
+    const query = new cloudDatabase.DatabaseQuery(model);
+    query.equalTo('UserID', userID);
+    const records = await this.agcDataBase.query(query);
+    for (const r of records) {
+      if (r.Distance && r.Distance > maxDistance) {
+        maxDistance = r.Distance;
+      }
+    }
+  }
+  return maxDistance;
 }
