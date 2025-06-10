@@ -175,160 +175,197 @@ export class WorkoutPlanService extends ExercisePlanService {
     }
   }
 
-  public async getNotStartedPlan(userID:string) {
-    let condition = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-    condition.equalTo('UserID',userID).and().equalTo('PlanState','NotStarted');
-    const planArray: WorkoutPlan[]= await this.agcDataBase.query(condition);
-    return planArray;
-  }
-
-  public async getCompletedPlan(userID:string) {
-    let condition = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-    condition.equalTo('UserID',userID).and().equalTo('PlanState','Completed');
-    const planArray: WorkoutPlan[]= await this.agcDataBase.query(condition);
-    return planArray;
-  }
-
-  public async getInProgressPlan(userID:string) {
-    let condition = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-    condition.equalTo('UserID',userID).and().equalTo('PlanState','InProgress');
-    const planArray: WorkoutPlan[]= await this.agcDataBase.query(condition);
-    return planArray;
-  }
-
-  public async getAbandonedPlan(userID:string) {
-    let condition = new cloudDatabase.DatabaseQuery(WorkoutPlan);
-    condition.equalTo('UserID',userID).and().equalTo('PlanState','Abandoned');
-    const planArray: WorkoutPlan[]= await this.agcDataBase.query(condition);
-    return planArray;
-  }
-
-  public async abandonInProgressPlan(targetPlan:WorkoutPlan){
-    try{
-      targetPlan.PlanState = "Abandoned";
-      await this.agcDataBase?.upsert(targetPlan);
-      console.info(`Succeeded in abandoning a plan.`);
-      return true;
-    }
-    catch(err){
-      console.info(`Failed in deleting a plan: ${JSON.stringify(err)} `);
-      return false;
-    }
-  };
-}
-
-
   /**
-   * 获取某计划的所有任务，按状态分类返回
-   */
-  public async getTasksByPlanID(planID: string): Promise<{ pending: PlanTask[], completed: PlanTask[], cancelled: PlanTask[] }> {
-    const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID);
-    const tasks: PlanTask[] = await this.agcDataBase.query(condition);
-
-    const pending = tasks.filter(t => t.State === 'Pending');
-    const completed = tasks.filter(t => t.State === 'Completed');
-    const cancelled = tasks.filter(t => t.State === 'Cancelled');
-
-    return { pending, completed, cancelled };
+ * 获取指定用户处于指定状态的所有训练计划
+ * @param userID - 用户ID
+ * @param state - 计划状态（如 NotStarted、InProgress、Completed、Abandoned）
+ * @returns 满足条件的 WorkoutPlan 数组
+ */
+public async getPlansByState(userID: string, state: string): Promise<WorkoutPlan[]> {
+  if (!userID || !state) {
+    console.warn('Invalid input for getPlansByState');
+    return [];
   }
-
-  /**
-   * 标记某任务为完成
-   */
-  public async completeTask(taskID: string): Promise<boolean> {
-    try {
-      const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('TaskID', taskID);
-      const tasks: PlanTask[] = await this.agcDataBase.query(condition);
-      if (tasks.length === 0) return false;
-
-      const task = tasks[0];
-      task.State = 'Completed';
-      await this.agcDataBase.upsert(task);
-      return true;
-    } catch (err) {
-      console.error('完成任务失败:', err);
-      return false;
-    }
-  }
-
-  /**
-   * 计算计划的执行进度百分比（完成任务数/总任务数）
-   */
-  public async getPlanProgress(planID: string): Promise<number> {
-    const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID);
-    const tasks: PlanTask[] = await this.agcDataBase.query(condition);
-    if (tasks.length === 0) return 0;
-
-    const completedCount = tasks.filter(t => t.State === 'Completed').length;
-    return Math.round((completedCount / tasks.length) * 100);
-  }
-
-  /**
-   * 按关键词搜索计划名称（模糊搜索）
-   */
-  public async searchPlansByName(userID: string, keyword: string, limit = 20, offset = 0): Promise<WorkoutPlan[]> {
-    // 注意：具体实现依赖数据库是否支持模糊搜索，这里用简单包含示意
-    const condition = new cloudDatabase.DatabaseQuery(WorkoutPlan)
+  try {
+    const query = new cloudDatabase.DatabaseQuery(WorkoutPlan)
       .equalTo('UserID', userID)
       .and()
-      .contains('PlanName', keyword); // 假设contains支持模糊搜索
-
-    const plans = await this.agcDataBase.query(condition, { limit, offset });
-    return plans;
+      .equalTo('PlanState', state);
+    return await this.agcDataBase.query(query);
+  } catch (err) {
+    console.error(`Failed to fetch plans by state: ${state}`, err);
+    return [];
   }
+}
 
-  /**
-   * 记录计划操作日志（简易示例）
-   */
-  public async logPlanOperation(planID: string, userID: string, operation: string, detail?: string) {
-    const log = {
+/**
+ * 将计划状态标记为已放弃（Abandoned）
+ * @param plan - 要更新状态的计划对象
+ * @returns 操作是否成功
+ */
+public async abandonPlan(plan: WorkoutPlan): Promise<boolean> {
+  try {
+    plan.PlanState = 'Abandoned';
+    await this.agcDataBase.upsert(plan);
+    console.info('Plan successfully marked as abandoned');
+    return true;
+  } catch (err) {
+    console.error('Failed to abandon plan:', err);
+    return false;
+  }
+}
+
+/**
+ * 获取指定计划下的所有任务，并按任务状态分类
+ * @param planID - 计划ID
+ * @returns 一个对象，包含 pending、completed 和 cancelled 三类任务数组
+ */
+public async getTasksGroupedByState(planID: string): Promise<{ pending: PlanTask[]; completed: PlanTask[]; cancelled: PlanTask[] }> {
+  try {
+    const query = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID);
+    const allTasks = await this.agcDataBase.query(query);
+    return {
+      pending: allTasks.filter(t => t.State === 'Pending'),
+      completed: allTasks.filter(t => t.State === 'Completed'),
+      cancelled: allTasks.filter(t => t.State === 'Cancelled'),
+    };
+  } catch (err) {
+    console.error('Error grouping tasks by state:', err);
+    return { pending: [], completed: [], cancelled: [] };
+  }
+}
+
+/**
+ * 将某任务标记为已完成（Completed）
+ * @param taskID - 任务ID
+ * @returns 操作是否成功
+ */
+public async markTaskAsCompleted(taskID: string): Promise<boolean> {
+  try {
+    const query = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('TaskID', taskID);
+    const [task] = await this.agcDataBase.query(query);
+    if (!task) return false;
+
+    task.State = 'Completed';
+    await this.agcDataBase.upsert(task);
+    return true;
+  } catch (err) {
+    console.error('Failed to complete task:', err);
+    return false;
+  }
+}
+
+/**
+ * 计算指定计划的完成进度百分比
+ * @param planID - 计划ID
+ * @returns 计划完成进度（百分比整数）
+ */
+public async calculatePlanProgress(planID: string): Promise<number> {
+  try {
+    const query = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('PlanID', planID);
+    const tasks = await this.agcDataBase.query(query);
+    if (!tasks.length) return 0;
+
+    const completed = tasks.filter(t => t.State === 'Completed').length;
+    return Math.round((completed / tasks.length) * 100);
+  } catch (err) {
+    console.error('Error calculating plan progress:', err);
+    return 0;
+  }
+}
+
+/**
+ * 通过关键词搜索指定用户的训练计划（模糊匹配计划名）
+ * @param userID - 用户ID
+ * @param keyword - 计划名称关键字
+ * @param limit - 返回条数限制
+ * @param offset - 分页偏移
+ * @returns 匹配到的 WorkoutPlan 数组
+ */
+public async searchPlans(userID: string, keyword: string, limit = 20, offset = 0): Promise<WorkoutPlan[]> {
+  try {
+    const query = new cloudDatabase.DatabaseQuery(WorkoutPlan)
+      .equalTo('UserID', userID)
+      .and()
+      .contains('PlanName', keyword);
+    return await this.agcDataBase.query(query, { limit, offset });
+  } catch (err) {
+    console.error('Plan search failed:', err);
+    return [];
+  }
+}
+
+/**
+ * 记录用户对计划进行的某项操作（如创建、更新、放弃等）
+ * @param planID - 计划ID
+ * @param userID - 用户ID
+ * @param operation - 操作类型描述
+ * @param detail - 可选的详细说明
+ */
+public async logPlanAction(planID: string, userID: string, operation: string, detail = ''): Promise<void> {
+  try {
+    const logEntry = {
       LogID: UUIDGenerator.getID(),
       PlanID: planID,
       UserID: userID,
       Operation: operation,
-      Detail: detail || '',
+      Detail: detail,
       Timestamp: new Date(),
     };
-    await this.agcDataBase.upsert(log);
+    await this.agcDataBase.upsert(logEntry);
+  } catch (err) {
+    console.error('Failed to log plan operation:', err);
   }
+}
 
-  /**
-   * 查询某用户所有计划的统计数据（计划数，完成数，放弃数等）
-   */
-  public async getUserPlanStatistics(userID: string) {
-    const planStates = ['NotStarted', 'InProgress', 'Completed', 'Abandoned'];
-    const stats: Record<string, number> = {};
-    for (const state of planStates) {
-      const condition = new cloudDatabase.DatabaseQuery(WorkoutPlan)
+/**
+ * 汇总用户的计划数量统计信息（各状态的数量）
+ * @param userID - 用户ID
+ * @returns 一个包含 NotStarted、InProgress、Completed、Abandoned 数量的对象
+ */
+public async summarizeUserPlans(userID: string): Promise<Record<string, number>> {
+  const states = ['NotStarted', 'InProgress', 'Completed', 'Abandoned'];
+  const summary: Record<string, number> = {};
+
+  try {
+    for (const state of states) {
+      const query = new cloudDatabase.DatabaseQuery(WorkoutPlan)
         .equalTo('UserID', userID)
         .and()
         .equalTo('PlanState', state);
-      const plans = await this.agcDataBase.query(condition);
-      stats[state] = plans.length;
+      const results = await this.agcDataBase.query(query);
+      summary[state] = results.length;
     }
-    return stats;
+  } catch (err) {
+    console.error('Failed to summarize user plans:', err);
   }
 
-  /**
-   * 批量更新多个任务状态（例如批量取消）
-   */
-  public async batchUpdateTasksState(taskIDs: string[], newState: string): Promise<boolean> {
-    try {
-      for (const id of taskIDs) {
-        const condition = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('TaskID', id);
-        const tasks = await this.agcDataBase.query(condition);
-        if (tasks.length > 0) {
-          const task = tasks[0];
-          task.State = newState;
-          await this.agcDataBase.upsert(task);
-        }
+  return summary;
+}
+
+/**
+ * 批量更新多个任务的状态（如批量标记为已取消）
+ * @param taskIDs - 要更新状态的任务ID数组
+ * @param newState - 新状态（如 'Cancelled'）
+ * @returns 操作是否全部成功
+ */
+public async batchUpdateTaskStates(taskIDs: string[], newState: string): Promise<boolean> {
+  try {
+    for (const taskID of taskIDs) {
+      const query = new cloudDatabase.DatabaseQuery(PlanTask).equalTo('TaskID', taskID);
+      const [task] = await this.agcDataBase.query(query);
+      if (task) {
+        task.State = newState;
+        await this.agcDataBase.upsert(task);
       }
-      return true;
-    } catch (err) {
-      console.error('批量更新任务状态失败:', err);
-      return false;
     }
+    return true;
+  } catch (err) {
+    console.error('Failed to batch update task states:', err);
+    return false;
   }
+}
+
 
 
 public async autoUpdatePlanStates(userID: string): Promise<void> {
