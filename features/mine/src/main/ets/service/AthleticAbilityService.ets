@@ -147,31 +147,58 @@ public async getMaxAbilityValue(userId: string, field: keyof AthleticAbility): P
 }
 
 /**
- * 统计某用户提交的运动能力记录总数
+ * 获取某用户提交的运动能力记录总数
+ * @param userId - 用户ID
+ * @returns 提交记录总数
  */
 public async getTotalRecordCount(userId: string): Promise<number> {
-  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
-    .equalTo('UserID', userId);
+  if (!userId) {
+    console.warn('Invalid userId provided to getTotalRecordCount');
+    return 0;
+  }
 
-  const result = await this.agcDataBase.query(condition);
-  return result.length;
+  try {
+    const query = new cloudDatabase.DatabaseQuery(AthleticAbility)
+      .equalTo('UserID', userId);
+
+    const records = await this.agcDataBase.query(query);
+    return records.length;
+  } catch (err) {
+    console.error('Failed to get total athletic ability record count:', err);
+    return 0;
+  }
 }
 
 /**
- * 获取运动能力历史记录中每日记录数量（可用于图表分析）
+ * 统计用户运动能力记录按日期的分布情况（用于绘图分析）
+ * @param userId - 用户ID
+ * @returns 一个以日期字符串为键、该日记录数为值的对象
  */
 public async getDailyRecordDistribution(userId: string): Promise<Record<string, number>> {
-  const condition = new cloudDatabase.DatabaseQuery(AthleticAbility)
-    .equalTo('UserID', userId)
-    .orderByDesc('LastUpdated');
-
-  const result = await this.agcDataBase.query(condition);
   const distribution: Record<string, number> = {};
 
-  result.forEach(record => {
-    const dateStr = record.LastUpdated.toString(); // 假设为整数格式日期
-    distribution[dateStr] = (distribution[dateStr] || 0) + 1;
-  });
+  if (!userId) {
+    console.warn('Invalid userId provided to getDailyRecordDistribution');
+    return distribution;
+  }
 
-  return distribution;
+  try {
+    const query = new cloudDatabase.DatabaseQuery(AthleticAbility)
+      .equalTo('UserID', userId)
+      .orderByDesc('LastUpdated');
+
+    const records = await this.agcDataBase.query(query);
+
+    for (const record of records) {
+      // 将 LastUpdated 转换为 YYYYMMDD 格式的字符串键
+      const dateKey = record.LastUpdated?.toString() || 'unknown';
+      distribution[dateKey] = (distribution[dateKey] || 0) + 1;
+    }
+
+    return distribution;
+  } catch (err) {
+    console.error('Failed to get daily athletic ability record distribution:', err);
+    return {};
+  }
 }
+

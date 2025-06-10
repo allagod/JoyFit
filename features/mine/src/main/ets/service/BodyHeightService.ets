@@ -42,57 +42,65 @@ export class BodyHeightService {
   }
 
   /**
-   * 修改用户身高，并自动更新 BMI（若有最新体重）
-   */
-  public async updateHeight(uid: string, newHeight: number): Promise<boolean> {
-    if (!uid || !newHeight) {
-      console.error('[updateHeight] Missing parameters');
-      return false;
-    }
-
-    try {
-      const heightEntry = new BodyHeight();
-      heightEntry.UserID = uid;
-      heightEntry.Height = newHeight;
-      heightEntry.LastUpdateTime = new Date();
-
-      const result = await this.agcDataBase.upsert(heightEntry);
-
-      if (result <= 0) {
-        console.warn('[updateHeight] No height records inserted');
-        return false;
-      }
-
-      // 更新 BMI（如果有最新体重）
-      const latestWeight = await this.bodyWeightService.getLatestWeightData(uid);
-      if (latestWeight?.Weight) {
-        const newBMI = BmiCalculator.calculateBMI(newHeight, latestWeight.Weight);
-        await this.insertWeightWithBMI(uid, latestWeight.Weight, newBMI);
-      }
-
-      return true;
-    } catch (err) {
-      console.error('[updateHeight] Failed to update height:', err);
-      return false;
-    }
+ * 更新用户身高记录，并在有最新体重数据的情况下同步更新 BMI。
+ * @param uid - 用户ID
+ * @param newHeight - 新的身高值（厘米）
+ * @returns 是否更新成功
+ */
+public async updateHeight(uid: string, newHeight: number): Promise<boolean> {
+  if (!uid || typeof newHeight !== 'number' || newHeight <= 0) {
+    console.error('[updateHeight] Invalid parameters: uid or newHeight');
+    return false;
   }
 
-  /**
-   * 私有方法：根据体重和 BMI 插入体重记录
-   */
-  private async insertWeightWithBMI(uid: string, weight: number, bmi: number): Promise<boolean> {
-    try {
-      const weightRecord = new WeightData();
-      weightRecord.UserID = uid;
-      weightRecord.Weight = weight;
-      weightRecord.BMI = bmi;
-      weightRecord.WeightRecordTime = DateConverToNum.convertDateToInteger(new Date());
+  try {
+    const heightRecord = new BodyHeight();
+    heightRecord.UserID = uid;
+    heightRecord.Height = newHeight;
+    heightRecord.LastUpdateTime = new Date();
 
-      const result = await this.agcDataBase.upsert(weightRecord);
-      return result > 0;
-    } catch (err) {
-      console.error('[insertWeightWithBMI] Failed to insert BMI-linked weight record:', err);
+    const affectedRows = await this.agcDataBase.upsert(heightRecord);
+    if (affectedRows <= 0) {
+      console.warn('[updateHeight] No height record inserted or updated');
       return false;
     }
+
+    // 如果存在最新体重记录，则同步更新 BMI
+    const latestWeight = await this.bodyWeightService.getLatestWeightData(uid);
+    if (latestWeight?.Weight) {
+      const bmi = BmiCalculator.calculateBMI(newHeight, latestWeight.Weight);
+      const bmiUpdated = await this.insertWeightWithBMI(uid, latestWeight.Weight, bmi);
+      if (!bmiUpdated) {
+        console.warn('[updateHeight] BMI not updated properly');
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[updateHeight] Exception during height update:', err);
+    return false;
+  }
+}
+
+/**
+ * 私有方法：插入带有 BMI 的体重记录（用于同步更新）
+ * @param uid - 用户ID
+ * @param weight - 当前体重（kg）
+ * @param bmi - 计算出的 BMI 值
+ * @returns 是否插入成功
+ */
+private async insertWeightWithBMI(uid: string, weight: number, bmi: number): Promise<boolean> {
+  try {
+    const record = new WeightData();
+    record.UserID = uid;
+    record.Weight = weight;
+    record.BMI = bmi;
+    record.WeightRecordTime = DateConverToNum.convertDateToInteger(new Date());
+
+    const result = await this.agcDataBase.upsert(record);
+    return result > 0;
+  } catch (err) {
+    console.error('[insertWeightWithBMI] Failed to insert weight record with BMI:', err);
+    return false;
   }
 }
