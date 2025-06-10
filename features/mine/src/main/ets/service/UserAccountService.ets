@@ -25,29 +25,28 @@ export class UserAccountService {
     return UserAccountService.instance;
   }
 
-  //构造一个 newUserInfo 对象
-  private createUserInfo(userInfo: userInfo, uid: string): UserInfo {
-    let newUserInfo = new UserInfo();
-    newUserInfo.UserID = uid;
-    newUserInfo.NickName = userInfo.nickname;
-    newUserInfo.Avtar = userInfo.avtar;
-    newUserInfo.Age = userInfo.age;
-    newUserInfo.Sex = userInfo.sex;
-    newUserInfo.City = userInfo.city;
+  
+private createUserInfo(userInfo: UserInfo, uid: string): UserInfo {
+    return new UserInfo({
+        UserID: uid,
+        NickName: userInfo.nickname,
+        Avtar: userInfo.avtar,
+        Age: userInfo.age,
+        Sex: userInfo.sex,
+        City: userInfo.city
+    });
+}
 
-    return newUserInfo;
-  }
 
-  private createAccountInfo(newaccountInfo: accountInfo, uid: string): AccountInfo {
-    let newaccount = new AccountInfo();
-    newaccount.AccountInfoID=UUIDGenerator.getID();
-    newaccount.PhoneNumber=newaccountInfo.phoneNumber;
-    newaccount.PassWord=newaccountInfo.password;
-    newaccount.AccountState='正常';
-    newaccount.UserID=uid;
-
-    return newaccount;
-  }
+private createAccountInfo(accountData: AccountInfo, uid: string): AccountInfo {
+    return new AccountInfo({
+        AccountInfoID: UUIDGenerator.getID(),
+        PhoneNumber: accountData.phoneNumber,
+        PassWord: accountData.password,
+        AccountState: '正常', // 可以考虑使用枚举代替硬编码字符串
+        UserID: uid
+    });
+}
 
   sendVerifyCode(phoneNumber:string): boolean {
     auth.requestVerifyCode({
