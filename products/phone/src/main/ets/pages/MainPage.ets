@@ -44,10 +44,7 @@ struct MainPage {
   private renderSportsTab() {
     return SportsDataPage()
   }
-
-  private renderPlanTab() {
-    return Column() {
-      Swiper() {
+        Swiper() {
         Image($r('app.media.swipper1'))
         Image($r('app.media.swipper2'))
         Image($r('app.media.swipper3'))
@@ -60,11 +57,14 @@ struct MainPage {
       .borderRadius(10)
       .indicator(
         Indicator.dot()
-          .itemWidth(10)
+          .itemWidth(17)
           .itemHeight(3)
           .selectedItemWidth(30)
           .selectedColor(Color.White)
       )
+
+  private renderPlanTab() {
+    return Column() {
 
       Scroll() {
         Column() {
@@ -74,10 +74,6 @@ struct MainPage {
               .fontWeight(FontWeight.Bold)
               .decoration({ type: TextDecorationType.Underline, color: Color.Black })
             Blank()
-            Row() {
-              Text(this.isWorkOut ? '健身' : '跑步').fontColor(Color.White)
-              Image($r('app.media.ic_reverse_order')).width(20).margin({ left: 10 }).fillColor(Color.White)
-            }
             .padding(8)
             .backgroundColor("#ff2191fa")
             .borderRadius(15)
@@ -100,9 +96,6 @@ struct MainPage {
                 .fontWeight(FontWeight.Bold)
                 .margin({ right: 5 })
                 .fontColor('#b05e74f5')
-              Image($r('app.media.ic_plus_square'))
-                .height(30)
-                .fillColor('#ff5e74f5')
             }
             .onClick(() => {
               router.pushUrl({
