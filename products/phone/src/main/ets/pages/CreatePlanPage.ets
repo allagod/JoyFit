@@ -1,102 +1,195 @@
+import MinePage from '../view/MinePage'
+import SportsDataPage from '../view/SportsDataPage'
 import { router } from '@kit.ArkUI'
-import { Action, PlanTask } from 'exercise'
-import { PlanAction } from 'exercise/src/main/ets/bean/PlanAction'
-import { WorkoutPlan } from 'exercise/src/main/ets/bean/WorkoutPlan'
-
-interface ParamsObj {
-  workoutPlan: WorkoutPlan
-}
-
-class SysRecord {
-  public index: number = 0
-  public state: string = ''
-  public color: string = ''
-
-  constructor(index: number, state: string) {
-    this.index = index
-    this.state = state
-    if (state == 'Completed') this.color = '#a344ab30'
-    if (state == 'Pending') this.color = "#c42191fa"
-  }
-}
+import { WorkoutPlanService } from "exercise/src/main/ets/service/WorkoutPlanService"
+import { WorkoutPlan } from "exercise/src/main/ets/bean/WorkoutPlan"
+import { WorkoutPlanViewModel } from './WorkoutPlanViewModel' // 假设已分离
 
 @Entry
 @ComponentV2
-struct CreatePlanPage {
-  @Local workoutPlan: WorkoutPlan = new WorkoutPlan()
-  @Local startDate: Date = new Date()
-  @Local endDate: Date = new Date()
-  @Local dayOfWeek: string = ''
-  @Local weekdayIsSelected: boolean[] = [false, false, false, false, false, false, false]
-  @Local state: string = ''
-  @Local isRecord: boolean = true
-  @Local planTasks: PlanTask[] = []
+struct MainPage {
+  @Local selectedIndex: number = 0
+  @Local isWorkOut: boolean = true
 
-  private weekdaysList: string[] = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  private title: string = ''
-  private startEndDatePrompt: string = ''
-  private workoutDayPrompt: string = ''
-  private actionList: Action[] = [new Action()]
-  private planActionList: PlanAction[] = []
+  private workoutPlanService: WorkoutPlanService = WorkoutPlanService.getInstance()
+  private emptyWorkoutPlan: WorkoutPlan = new WorkoutPlan()
 
-  aboutToAppear(): void {
-    const params = router.getParams() as ParamsObj
-    this.workoutPlan = params.workoutPlan
+  private inProgressPlanList: WorkoutPlan[] = []
+  private notStartedPlanList: WorkoutPlan[] = []
+  private abandonedPlanList: WorkoutPlan[] = []
+  private completedPlanList: WorkoutPlan[] = []
 
-    if (this.workoutPlan.StartDate instanceof Date)
-      this.startDate = this.workoutPlan.StartDate
+  @Local inProgressPlanViewModelList: WorkoutPlanViewModel[] = []
+  @Local notStartedPlanViewModelList: WorkoutPlanViewModel[] = []
+  @Local abandonedPlanViewModelList: WorkoutPlanViewModel[] = []
+  @Local completedPlanViewModelList: WorkoutPlanViewModel[] = []
 
-    if (this.workoutPlan.EndDate instanceof Date)
-      this.endDate = this.workoutPlan.EndDate
-
-    for (let i = 0; i < this.workoutPlan.DayOfWeek.length; i += 2)
-      this.weekdayIsSelected[(Number(this.workoutPlan.DayOfWeek[i]) + 6) % 7] = true
-
-    if (this.workoutPlan.PlanState != undefined)
-      this.state = this.workoutPlan.PlanState
-
-    this.initPlanDisplayText(this.state)
-
-    this.actionList[0].ActionName = '卷腹'
+  async aboutToAppear(): Promise<void> {
+    try {
+      this.emptyWorkoutPlan.PlanState = 'NotStarted'
+      const plans = await Promise.all([
+        this.workoutPlanService.getInProgressPlan('2'),
+        this.workoutPlanService.getNotStartedPlan('2'),
+        this.workoutPlanService.getAbandonedPlan('2'),
+        this.workoutPlanService.getCompletedPlan('2')
+      ])
+      this.inProgressPlanViewModelList = plans[0]
+      this.notStartedPlanViewModelList = plans[1]
+      this.abandonedPlanViewModelList = plans[2]
+      this.completedPlanViewModelList = plans[3]
+    } catch (error) {
+      // 可补充错误提示
+    }
   }
 
-  // ✅ 提取状态对应文案逻辑
-  private initPlanDisplayText(state: string): void {
-    const isCreate = state === 'NotStarted'
-    this.title = isCreate ? '计划创建' : '计划详情'
-    this.startEndDatePrompt = isCreate ? '点击修改起止日期' : '训练起止日期'
-    this.workoutDayPrompt = isCreate ? '点击选择训练日' : '训练日'
+  private renderSportsTab() {
+    return SportsDataPage()
   }
 
-  // 🧮 示例辅助方法（未改动）
-  private getDaysFromMonth(month: number, year: number): number {
-    let days: number[] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    let run: boolean = false
-    if (year % 4 == 0) run = true
-    if (year % 100 == 0 && year % 400 != 0) run = false
-    days[1] += run ? 1 : 0
-    return days[month]
+  private renderPlanTab() {
+    return Column() {
+      this.renderPlanSwiper()
+      this.renderPlanScroll()
+    }
+    .width('100%')
+    .height('100%')
+    .padding({ top: 20, left: 40, right: 40 })
+    .backgroundColor("#eeeeee")
   }
 
-  private generateMonthlySysRecords(): SysRecord[] {
-    return []  // 可根据月份构造真实数据
+  private renderPlanSwiper() {
+    return Swiper() {
+      Image($r('app.media.swipper1'))
+      Image($r('app.media.swipper2'))
+      Image($r('app.media.swipper3'))
+    }
+    .width('100%')
+    .height(150)
+    .loop(true)
+    .autoPlay(true)
+    .interval(3000)
+    .borderRadius(10)
+    .indicator(
+      Indicator.dot()
+        .itemWidth(10)
+        .itemHeight(3)
+        .selectedItemWidth(30)
+        .selectedColor(Color.White)
+    )
+  }
+
+  private renderPlanScroll() {
+    return Scroll() {
+      Column() {
+        Row() {
+          Text('正在执行')
+            .fontSize(20)
+            .fontWeight(FontWeight.Bold)
+            .decoration({ type: TextDecorationType.Underline, color: Color.Black })
+          Blank()
+          Row() {
+            Text(this.isWorkOut ? '健身' : '跑步').fontColor(Color.White)
+            Image($r('app.media.ic_reverse_order')).width(20).margin({ left: 10 }).fillColor(Color.White)
+          }
+          .padding(8)
+          .backgroundColor("#ff2191fa")
+          .borderRadius(15)
+          .onClick(() => this.isWorkOut = !this.isWorkOut)
+        }
+        .width('100%')
+        .margin({ top: 15, bottom: 5 })
+
+        ForEach(this.inProgressPlanViewModelList, (item: WorkoutPlanViewModel) => {
+          planItem({ workoutPlan: item })
+        })
+
+        Row() {
+          Text('即将进行')
+            .fontSize(20)
+            .fontWeight(FontWeight.Bold)
+            .decoration({ type: TextDecorationType.Underline, color: Color.Black })
+          Row() {
+            Text('新增计划')
+              .fontWeight(FontWeight.Bold)
+              .margin({ right: 5 })
+              .fontColor('#b05e74f5')
+            Image($r('app.media.ic_plus_square'))
+              .height(30)
+              .fillColor('#ff5e74f5')
+          }
+          .onClick(() => {
+            router.pushUrl({
+              url: "pages/CreatePlanPage",
+              params: { workoutPlan: this.emptyWorkoutPlan }
+            })
+          })
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        .margin({ top: 10, bottom: 10 })
+
+        ForEach(this.notStartedPlanViewModelList, (item: WorkoutPlanViewModel) => {
+          planItem({ workoutPlan: item })
+        })
+
+        Text('历史计划')
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+          .decoration({ type: TextDecorationType.Underline, color: Color.Black })
+          .margin({ top: 10 })
+          .width('100%')
+
+        ForEach(this.completedPlanViewModelList, (item: WorkoutPlanViewModel) => {
+          planItem({ workoutPlan: item })
+        })
+        ForEach(this.abandonedPlanViewModelList, (item: WorkoutPlanViewModel) => {
+          planItem({ workoutPlan: item })
+        })
+      }
+    }
+    .scrollBar(BarState.Off)
+    .height(540)
+    .edgeEffect(EdgeEffect.Spring)
+  }
+
+  private renderMineTab() {
+    return MinePage()
   }
 
   build() {
-    Column() {
-      Row() {
-        Image($r('app.media.ic_chevron_left'))
-          .height(30)
-          .onClick(() => router.back())
-        Text(this.title)
+    Tabs({ barPosition: BarPosition.End }) {
+      TabContent() {
+        this.renderSportsTab()
       }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-      .padding({ left: 30, right: 30, bottom: 15 })
+      .tabBar(this.myTabBar(0, '运动', $r('app.media.ic_figure_running')))
 
-      // 省略中间 build 中非常长的 UI 区域...
-      // 如需继续优化其他部分结构，请说明
+      TabContent() {
+        this.renderPlanTab()
+      }
+      .tabBar(this.myTabBar(1, '计划', $r('app.media.ic_list_bullet')))
 
+      TabContent() {
+        this.renderMineTab()
+      }
+      .tabBar(this.myTabBar(2, '我的', $r('app.media.ic_house_fill')))
     }
+    .scrollable(true)
+    .onChange((index: number) => {
+      this.selectedIndex = index
+    })
+  }
+
+  @Builder
+  myTabBar(itemIndex: number, title: string, image: Resource) {
+    Column() {
+      Image(image)
+        .width(20)
+        .fillColor(itemIndex == this.selectedIndex ? Color.Black : '#6d000000')
+      Text(title)
+        .fontColor(itemIndex == this.selectedIndex ? Color.Black : '#6d000000')
+        .fontSize(12)
+        .margin({ top: 5 })
+    }
+    .margin({ top: 8 })
   }
 }
