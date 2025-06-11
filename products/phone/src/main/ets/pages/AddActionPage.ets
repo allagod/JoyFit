@@ -9,7 +9,21 @@ struct AddActionPage {
   @Local isUpload: boolean = false
 
   private trainingPartList: string[] = ['胸', '背', '肩', '手臂', '腹部', '腿']
-  private select: number | number[] = 0
+  private select: number = 0
+
+  private showPicker() {
+    this.getUIContext().showTextPickerDialog({
+      range: this.trainingPartList,
+      selected: this.select,
+      disappearTextStyle: { color: '#65000000', font: { size: 15, weight: FontWeight.Lighter } },
+      textStyle: { color: Color.Black, font: { size: 20, weight: FontWeight.Normal } },
+      selectedTextStyle: { color: Color.Black, font: { size: 24, weight: FontWeight.Bold } },
+      onAccept: (value: TextPickerResult) => {
+        this.select = value.index
+        this.actionType = value.value as string
+      }
+    })
+  }
 
   build() {
     Column() {
@@ -18,7 +32,6 @@ struct AddActionPage {
           .height(30)
           .onClick(() => {
             router.back()
-            //router.back()
           })
         Text('创建动作')
         Image($r('app.media.ic_plus_square'))
@@ -27,7 +40,7 @@ struct AddActionPage {
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
-      .padding({left: 30, right: 30})
+      .padding({ left: 30, right: 30 })
 
       Column() {
         TextInput({
@@ -37,7 +50,8 @@ struct AddActionPage {
           .backgroundColor(Color.White)
           .height(60)
           .width('100%')
-          .borderRadius({topLeft: 10, topRight: 10})
+          .borderRadius({ topLeft: 10, topRight: 10 })
+
         Row() {
           Text('动作分类')
           Blank()
@@ -45,27 +59,13 @@ struct AddActionPage {
           Image($r('app.media.ic_chevron_right'))
             .height(20)
             .fillColor('#52000000')
-            .margin({left: 10})
+            .margin({ left: 10 })
         }
         .width('100%')
         .height(60)
         .backgroundColor(Color.White)
         .padding(20)
-        .onClick(() => {
-          TextPickerDialog.show({ // 建议使用 this.getUIContext().showTextPickerDialog()接口
-            range: this.trainingPartList,
-            selected: this.select,
-            disappearTextStyle: {color: '#65000000', font: {size: 15, weight: FontWeight.Lighter}},
-            textStyle: {color: Color.Black, font: {size: 20, weight: FontWeight.Normal}},
-            selectedTextStyle: {color: Color.Black, font: {size: 24, weight: FontWeight.Bold}},
-            onAccept: (value: TextPickerResult) => {
-              // 设置select为按下确定按钮时候的选中项index，这样当弹窗再次弹出时显示选中的是上一次确定的选项
-              this.select = value.index
-              // 点击确定后，被选到的文本数据展示到页面
-              this.actionType = value.value as string
-            }
-          })
-        })
+        .onClick(() => this.showPicker())
 
         Row() {
           Text('动作视频')
@@ -75,28 +75,26 @@ struct AddActionPage {
           Image($r('app.media.ic_chevron_right'))
             .height(20)
             .fillColor('#52000000')
-            .margin({left: 10})
+            .margin({ left: 10 })
         }
         .width('100%')
         .height(60)
         .backgroundColor(Color.White)
         .padding(20)
-        .borderRadius({bottomLeft: 10, bottomRight: 10})
+        .borderRadius({ bottomLeft: 10, bottomRight: 10 })
         .onClick(() => {
           this.isUpload = !this.isUpload
-          router.pushUrl({
-            url: "pages/Test"
-          })
+          router.pushUrl({ url: "pages/Test" })
         })
       }
-      .margin({top: 20})
+      .margin({ top: 20 })
 
       TextArea({
         placeholder: '\n                    请输入动作描述',
         text: $$this.actionDescription
       })
         .backgroundColor(Color.White)
-        .margin({top: 20})
+        .margin({ top: 20 })
         .height(80)
 
       Blank()
@@ -104,9 +102,7 @@ struct AddActionPage {
       Button('创建动作')
         .width('100%')
         .onClick(() => {
-          router.pushUrl({
-            url: "pages/MainPage3"
-          })
+          router.pushUrl({ url: "pages/MainPage3" })
         })
     }
     .width('100%')
