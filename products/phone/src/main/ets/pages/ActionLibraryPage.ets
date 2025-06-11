@@ -1,40 +1,29 @@
 @Entry
 @ComponentV2
 struct ActionLibraryPage {
-  @Local armsActionList: Action[] = []
-  @Local abdomenActionList: Action[] = []
-  @Local shouldersActionList: Action[] = []
-  @Local nowActionList: Action[] = []
   @Local selectedItem: number = 0
-  @Local chestActionList: Action[] = []
-  @Local backActionList: Action[] = []
-  @Local legActionList: Action[] = []
+  @Local nowActionList: Action[] = []
 
-  private trainingPartList: string[] = ['胸', '背', '肩', '手臂', '腹部', '腿']
-  private actionMap: Action[][] = []
-  private exerciseList: exercise[] = [new exercise('app.media.test_exercise_item', '卷腹', 20)]
+  // 使用统一结构保存训练部位及其动作列表
+  private trainingParts: { name: string; fetch: () => Promise<Action[]>; actions: Action[] }[] = [
+    { name: '胸', fetch: () => this.actionRepository.getAllChestActions(), actions: [] },
+    { name: '背', fetch: () => this.actionRepository.getAllBackActions(), actions: [] },
+    { name: '肩', fetch: () => this.actionRepository.getAllShouldersActions(), actions: [] },
+    { name: '手臂', fetch: () => this.actionRepository.getAllArmsActions(), actions: [] },
+    { name: '腹部', fetch: () => this.actionRepository.getAllAbdomenActions(), actions: [] },
+    { name: '腿', fetch: () => this.actionRepository.getAllLegActions(), actions: [] }
+  ]
+
   private actionRepository: ActionRepository = ActionRepository.getInstance()
   private emptyWorkoutPlan: WorkoutPlan = new WorkoutPlan()
 
   async aboutToAppear(): Promise<void> {
-    this.chestActionList = await this.actionRepository.getAllChestActions()
-    this.backActionList = await this.actionRepository.getAllBackActions()
-    this.legActionList = await this.actionRepository.getAllLegActions()
-    this.armsActionList = await this.actionRepository.getAllArmsActions()
-    this.abdomenActionList = await this.actionRepository.getAllAbdomenActions()
-    this.shouldersActionList = await this.actionRepository.getAllShouldersActions()
+    // 异步拉取所有部位的动作列表
+    for (let part of this.trainingParts) {
+      part.actions = await part.fetch()
+    }
 
-    // 初始化映射关系
-    this.actionMap = [
-      this.chestActionList,
-      this.backActionList,
-      this.shouldersActionList,
-      this.armsActionList,
-      this.abdomenActionList,
-      this.legActionList
-    ]
-
-    this.nowActionList = this.actionMap[0]
+    this.nowActionList = this.trainingParts[0].actions
     this.emptyWorkoutPlan.PlanState = 'NotStarted'
     this.emptyWorkoutPlan.PlanName = '我的自定义计划'
   }
@@ -62,15 +51,14 @@ struct ActionLibraryPage {
 
       Row() {
         Column() {
-          ForEach(this.trainingPartList, (item: string, index: number) => {
+          ForEach(this.trainingParts, (part, index: number) => {
             trainingPartItem({
               isSelected: this.selectedItem === index,
-              trainingPartName: item
+              trainingPartName: part.name
+            }).onClick(() => {
+              this.selectedItem = index
+              this.nowActionList = this.trainingParts[index].actions
             })
-              .onClick(() => {
-                this.selectedItem = index
-                this.nowActionList = this.actionMap[index]  // 替代多个 if 判断
-              })
           })
         }
 
