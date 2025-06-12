@@ -4,103 +4,178 @@ import { BodyHeight } from "../bean/BodyHeight";
 import { WeightData } from "../bean/WeightData";
 import { BodyWeightService } from "./BodyWeightService";
 
-export class BodyHeightService {
-  private static instance: BodyHeightService | null = null;
+/*
+ * BodyWeightService.ts - 管理用户体重记录
+ */
+export class BodyWeightService {
+  private static instance: BodyWeightService | null = null;
   private agcDataBase = cloudDatabase.zone('joyfit');
-  private bodyWeightService = BodyWeightService.getInstance();
 
   private constructor() {}
 
-  public static getInstance(): BodyHeightService {
-    if (!BodyHeightService.instance) {
-      BodyHeightService.instance = new BodyHeightService();
+  public static getInstance(): BodyWeightService {
+    if (!BodyWeightService.instance) {
+      BodyWeightService.instance = new BodyWeightService();
     }
-    return BodyHeightService.instance;
+    return BodyWeightService.instance;
   }
 
-  /**
-   * 获取用户最新身高记录
-   */
-  public async getLatestHeight(uid: string): Promise<BodyHeight | null> {
-    if (!uid) {
-      console.error('[getLatestHeight] Missing UID');
-      return null;
-    }
-
+  public async getLatestWeightData(uid: string): Promise<WeightData | null> {
+    if (!uid) return null;
     try {
-      const query = new cloudDatabase.DatabaseQuery(BodyHeight)
+      const query = new cloudDatabase.DatabaseQuery(WeightData)
         .equalTo('UserID', uid)
-        .orderByDesc('LastUpdateTime')
+        .orderByDesc('WeightRecordTime')
         .limit(1);
-
       const result = await this.agcDataBase.query(query);
       return result[0] || null;
     } catch (err) {
-      console.error(`[getLatestHeight] Query failed:`, err);
+      console.error('[getLatestWeightData] Error:', err);
       return null;
     }
   }
 
-  /**
- * 更新用户身高记录，并在有最新体重数据的情况下同步更新 BMI。
- * @param uid - 用户ID
- * @param newHeight - 新的身高值（厘米）
- * @returns 是否更新成功
- */
-public async updateHeight(uid: string, newHeight: number): Promise<boolean> {
-  if (!uid || typeof newHeight !== 'number' || newHeight <= 0) {
-    console.error('[updateHeight] Invalid parameters: uid or newHeight');
-    return false;
-  }
-
-  try {
-    const heightRecord = new BodyHeight();
-    heightRecord.UserID = uid;
-    heightRecord.Height = newHeight;
-    heightRecord.LastUpdateTime = new Date();
-
-    const affectedRows = await this.agcDataBase.upsert(heightRecord);
-    if (affectedRows <= 0) {
-      console.warn('[updateHeight] No height record inserted or updated');
+  public async updateWeight(uid: string, weight: number): Promise<boolean> {
+    if (!uid || weight <= 0) return false;
+    try {
+      const record = new WeightData();
+      record.UserID = uid;
+      record.Weight = weight;
+      record.WeightRecordTime = DateConverToNum.convertDateToInteger(new Date());
+      const result = await this.agcDataBase.upsert(record);
+      return result > 0;
+    } catch (err) {
+      console.error('[updateWeight] Error:', err);
       return false;
     }
+  }
 
-    // 如果存在最新体重记录，则同步更新 BMI
-    const latestWeight = await this.bodyWeightService.getLatestWeightData(uid);
-    if (latestWeight?.Weight) {
-      const bmi = BmiCalculator.calculateBMI(newHeight, latestWeight.Weight);
-      const bmiUpdated = await this.insertWeightWithBMI(uid, latestWeight.Weight, bmi);
-      if (!bmiUpdated) {
-        console.warn('[updateHeight] BMI not updated properly');
-      }
+  public async deleteWeightRecord(uid: string, recordTime: number): Promise<boolean> {
+    try {
+      const query = new cloudDatabase.DatabaseQuery(WeightData)
+        .equalTo('UserID', uid)
+        .equalTo('WeightRecordTime', recordTime);
+      const result = await this.agcDataBase.delete(query);
+      return result > 0;
+    } catch (err) {
+      console.error('[deleteWeightRecord] Error:', err);
+      return false;
     }
-
-    return true;
-  } catch (err) {
-    console.error('[updateHeight] Exception during height update:', err);
-    return false;
   }
 }
 
-/**
- * 私有方法：插入带有 BMI 的体重记录（用于同步更新）
- * @param uid - 用户ID
- * @param weight - 当前体重（kg）
- * @param bmi - 计算出的 BMI 值
- * @returns 是否插入成功
+/*
+ * BmiHistoryService.ts - 管理用户 BMI 历史记录
  */
-private async insertWeightWithBMI(uid: string, weight: number, bmi: number): Promise<boolean> {
-  try {
-    const record = new WeightData();
-    record.UserID = uid;
-    record.Weight = weight;
-    record.BMI = bmi;
-    record.WeightRecordTime = DateConverToNum.convertDateToInteger(new Date());
+export class BmiHistoryService {
+  private static instance: BmiHistoryService | null = null;
+  private agcDataBase = cloudDatabase.zone('joyfit');
 
-    const result = await this.agcDataBase.upsert(record);
-    return result > 0;
-  } catch (err) {
-    console.error('[insertWeightWithBMI] Failed to insert weight record with BMI:', err);
-    return false;
+  private constructor() {}
+
+  public static getInstance(): BmiHistoryService {
+    if (!BmiHistoryService.instance) {
+      BmiHistoryService.instance = new BmiHistoryService();
+    }
+    return BmiHistoryService.instance;
+  }
+
+  public async getLatestBMI(uid: string): Promise<number | null> {
+    try {
+      const query = new cloudDatabase.DatabaseQuery(WeightData)
+        .equalTo('UserID', uid)
+        .orderByDesc('WeightRecordTime')
+        .limit(1);
+      const result = await this.agcDataBase.query(query);
+      return result[0]?.BMI || null;
+    } catch (err) {
+      console.error('[getLatestBMI] Error:', err);
+      return null;
+    }
+  }
+
+  public async getBmiHistory(uid: string, limit: number = 10): Promise<WeightData[]> {
+    try {
+      const query = new cloudDatabase.DatabaseQuery(WeightData)
+        .equalTo('UserID', uid)
+        .orderByDesc('WeightRecordTime')
+        .limit(limit);
+      return await this.agcDataBase.query(query);
+    } catch (err) {
+      console.error('[getBmiHistory] Error:', err);
+      return [];
+    }
+  }
+}
+
+/*
+ * BloodPressureService.ts - 血压记录服务
+ */
+export class BloodPressureService {
+  private static instance: BloodPressureService | null = null;
+  private agcDataBase = cloudDatabase.zone('joyfit');
+
+  private constructor() {}
+
+  public static getInstance(): BloodPressureService {
+    if (!BloodPressureService.instance) {
+      BloodPressureService.instance = new BloodPressureService();
+    }
+    return BloodPressureService.instance;
+  }
+
+  public async recordBloodPressure(uid: string, systolic: number, diastolic: number): Promise<boolean> {
+    try {
+      const record = new BloodPressureData();
+      record.UserID = uid;
+      record.Systolic = systolic;
+      record.Diastolic = diastolic;
+      record.RecordTime = DateConverToNum.convertDateToInteger(new Date());
+      const result = await this.agcDataBase.upsert(record);
+      return result > 0;
+    } catch (err) {
+      console.error('[recordBloodPressure] Error:', err);
+      return false;
+    }
+  }
+
+  public async getLatestBloodPressure(uid: string): Promise<BloodPressureData | null> {
+    try {
+      const query = new cloudDatabase.DatabaseQuery(BloodPressureData)
+        .equalTo('UserID', uid)
+        .orderByDesc('RecordTime')
+        .limit(1);
+      const result = await this.agcDataBase.query(query);
+      return result[0] || null;
+    } catch (err) {
+      console.error('[getLatestBloodPressure] Error:', err);
+      return null;
+    }
+  }
+}
+
+/*
+ * BodyMetricsSummaryService.ts - 汇总用户体征数据
+ */
+export class BodyMetricsSummaryService {
+  private heightService = BodyHeightService.getInstance();
+  private weightService = BodyWeightService.getInstance();
+  private bmiService = BmiHistoryService.getInstance();
+  private bpService = BloodPressureService.getInstance();
+
+  public async getLatestBodySummary(uid: string): Promise<any> {
+    const [height, weight, bmi, bp] = await Promise.all([
+      this.heightService.getLatestHeight(uid),
+      this.weightService.getLatestWeightData(uid),
+      this.bmiService.getLatestBMI(uid),
+      this.bpService.getLatestBloodPressure(uid)
+    ]);
+
+    return {
+      height: height?.Height || null,
+      weight: weight?.Weight || null,
+      bmi: bmi || null,
+      bloodPressure: bp ? `${bp.Systolic}/${bp.Diastolic}` : null
+    };
   }
 }
