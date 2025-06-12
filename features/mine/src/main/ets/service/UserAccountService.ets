@@ -26,30 +26,35 @@ export class UserAccountService {
   }
 
   
-private createUserInfo(userInfo: UserInfo, uid: string): UserInfo {
-    return new UserInfo({
-        UserID: uid,
-        NickName: userInfo.nickname,
-        Avtar: userInfo.avtar,
-        Age: userInfo.age,
-        Sex: userInfo.sex,
-        City: userInfo.city
-    });
+enum AccountState {
+  Normal = '正常',
+  Disabled = '停用',
 }
 
+private createUserInfo(userInfo: UserInfo, uid: string): UserInfo {
+  return new UserInfo({
+    UserID: uid,
+    NickName: userInfo.nickname,
+    Avatar: userInfo.avatar,
+    Age: userInfo.age,
+    Sex: userInfo.sex,
+    City: userInfo.city,
+  });
+}
 
 private createAccountInfo(accountData: AccountInfo, uid: string): AccountInfo {
-    return new AccountInfo({
-        AccountInfoID: UUIDGenerator.getID(),
-        PhoneNumber: accountData.phoneNumber,
-        PassWord: accountData.password,
-        AccountState: '正常', // 可以考虑使用枚举代替硬编码字符串
-        UserID: uid
-    });
+  return new AccountInfo({
+    AccountInfoID: UUIDGenerator.getID(),
+    PhoneNumber: accountData.phoneNumber,
+    PassWord: accountData.password,
+    AccountState: AccountState.Normal,
+    UserID: uid,
+  });
 }
 
-  sendVerifyCode(phoneNumber:string): boolean {
-    auth.requestVerifyCode({
+async sendVerifyCode(phoneNumber: string): Promise<boolean> {
+  try {
+    await auth.requestVerifyCode({
       action: VerifyCodeAction.REGISTER_LOGIN,
       lang: 'zh_CN',
       sendInterval: 60,
@@ -58,16 +63,14 @@ private createAccountInfo(accountData: AccountInfo, uid: string): AccountInfo {
         countryCode: "86",
         kind: "phone",
       }
-    }).then(verifyCodeResult => {
-      // 验证码申请成功
-        return true;
-    }).catch((error: Error) => {
-      // 验证码申请失败
-      //hilog.info(error.message)
-      return false;
-    })
+    });
+    return true;
+  } catch (error: any) {
+    // console.error(error.message);
     return false;
   }
+}
+
 
   async register(account: accountInfo): Promise<AuthUser | boolean> {
     try {
